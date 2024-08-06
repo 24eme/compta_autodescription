@@ -67,6 +67,9 @@ class Compta extends Controller
         for ($i = 0 ; $i < strlen($a) - 4 ; $i++) {
             $as[] = substr($a, $i, 4);
         }
+        if (strlen($a) <= 4) {
+            $as[] = $a;
+        }
         for ($i = 0 ; $i < strlen($b) - 4 ; $i++) {
             $bs[] = substr($b, $i, 4);
         }
