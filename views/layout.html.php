@@ -18,17 +18,17 @@
         <hr>
         <ul class="nav nav-pills flex-column mb-auto">
           <li class="nav-item">
-            <a href="/banque" class="nav-link active">
+            <a href="/banque" class="nav-link<?php if (Base::instance()->get('sidebar.actif') == 'banque') echo ' active'; ?>">
               Banque
             </a>
           </li>
           <li>
-            <a href="/pieces" class="nav-link link-body-emphasis">
+            <a href="/pieces" class="nav-link<?php if (Base::instance()->get('sidebar.actif') == 'piece') echo ' active'; ?>">
               Factures émises
             </a>
           </li>
           <li>
-            <a href="/files" class="nav-link link-body-emphasis">
+            <a href="/files" class="nav-link<?php if (Base::instance()->get('sidebar.actif') == 'file') echo ' active'; ?>">
               Le justificatifs
             </a>
           </li>

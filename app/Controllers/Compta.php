@@ -19,6 +19,7 @@ class Compta extends Controller
         $banque = new Banque();
         $banques = $banque->find(array(), array('order'=>'date DESC'));
         $f3->set('content', 'banque.html.php');
+        $f3->set('sidebar.actif', 'banque');
         echo \View::instance()->render('layout.html.php', 'text/html', compact('banques'));
     }
 
@@ -27,6 +28,7 @@ class Compta extends Controller
         $piece = new Piece();
         $pieces = $piece->find(null, array('order' => 'facture_date DESC'));
         $f3->set('content', 'pieces.html.php');
+        $f3->set('sidebar.actif', 'piece');
         echo \View::instance()->render('layout.html.php', 'text/html', compact('pieces'));
     }
 
@@ -38,6 +40,7 @@ class Compta extends Controller
         if (!$piece) {
             die('piece '.$id.' not found');
         }
+        $f3->set('sidebar.actif', 'piece');
         $f3->set('content', 'piece.html.php');
         echo \View::instance()->render('layout.html.php', 'text/html', compact('piece'));
     }
@@ -47,6 +50,7 @@ class Compta extends Controller
     {
         $file = new File();
         $files = $file->find(null, array('order' => 'ctime DESC'));
+        $f3->set('sidebar.actif', 'file');
         $f3->set('content', 'files.html.php');
         echo \View::instance()->render('layout.html.php', 'text/html', compact('files'));
     }
@@ -118,6 +122,7 @@ class Compta extends Controller
         uasort($pieces, 'Controllers\Compta::distancesort');
         uasort($files, 'Controllers\Compta::distancesort');
 
+        $f3->set('sidebar.actif', 'banque');
         $f3->set('content', 'associate_banque.html.php');
         echo \View::instance()->render('layout.html.php', 'text/html', compact('pieces', 'banque_line', 'files'));
 
@@ -154,6 +159,7 @@ class Compta extends Controller
         }
         uasort($banques, 'Controllers\Compta::distancesort');
 
+        $f3->set('sidebar.actif', 'piece');
         $f3->set('content', 'associate_piece.html.php');
         echo \View::instance()->render('layout.html.php', 'text/html', compact('file', 'piece', 'banques'));
     }
