@@ -125,7 +125,7 @@ function index_dir($path, $lastmod) {
                     }
                     if (!$row || !$row[0]) {
                         $sql  = "INSERT INTO file (fullpath, filename, md5, size, mtime, ctime, extention) VALUES (\"$filepath\", \"$file\" ";
-                        $sql .= isset($meta['md5']) ? ", \"".$meta['md5']."\"" : ', null';
+                        $sql .= isset($md5) ? ", \"".$md5."\"" : ', null';
                         $sql .= isset($stat['size']) ? ',  '.$stat['size']." " : ', null';
                         $sql .= isset($stat['mtime']) ? ', '.$stat['mtime'] : ', null';
                         $sql .= isset($stat['ctime']) ? ', '.$stat['ctime'] : ', null';
@@ -139,7 +139,7 @@ function index_dir($path, $lastmod) {
                         $sql .= " filename = \"$file\", extention = \"".$extention."\" ";
                         $sql .= isset($stat['size']) ? ', size = '.$stat['size']." " : '';
                         $sql .= isset($stat['mtime']) ? ', mtime = '.$stat['mtime'] : '';
-                        $sql .= isset($meta['md5']) ? ", md5 = '".$meta['md5']."'" : '';
+                        $sql .= isset($md5) ? ", md5 = '".$md5."'" : '';
                         $sql .= " WHERE fullpath = \"$filepath\";";
                         $db->exec($sql);
                     }
@@ -151,7 +151,7 @@ function index_dir($path, $lastmod) {
                         }
                         if (!$row || !$row[0]) {
                             $sql  = "INSERT INTO file (fullpath, filename, md5, size, mtime, ctime, extention) VALUES (\"$filepath\", \"$file\" ";
-                            $sql .= isset($meta['md5']) ? ", \"".$meta['md5']."\"" : ', null';
+                            $sql .= isset($md5) ? ", \"".$md5."\"" : ', null';
                             $sql .= isset($stat['size']) ? ',  '.$stat['size']." " : ', null';
                             $sql .= isset($stat['mtime']) ? ', '.$stat['mtime'] : ', null';
                             $sql .= isset($stat['ctime']) ? ', '.$stat['ctime'] : ', null';
@@ -162,7 +162,7 @@ function index_dir($path, $lastmod) {
                             }
 
                             $sql  = "INSERT INTO piece (fullpath, filename, md5) VALUES (\"$filepath\", \"$file\", ";
-                            $sql .= isset($meta['md5']) ? "\"".$meta['md5']."\"" : 'null';
+                            $sql .= isset($md5) ? "\"".$md5."\"" : 'null';
                             $sql .= ") ";
                             if (!$db->exec($sql)) {
                                 print_r(['ERROR', $sql]);
@@ -172,7 +172,7 @@ function index_dir($path, $lastmod) {
                         $sql .= " filename = \"$file\", extention = \"".$extention."\" ";
                         $sql .= isset($stat['size']) ? ', size = '.$stat['size']." " : '';
                         $sql .= isset($stat['mtime']) ? ', mtime = '.$stat['mtime'] : '';
-                        $sql .= isset($meta['md5']) ? ", md5 = '".$meta['md5']."'" : '';
+                        $sql .= isset($md5) ? ", md5 = '".$md5."'" : '';
                         $sql .= isset($meta['facture:type']) ? ", facture_type = \"".$meta['facture:type']."\"" : '';
                         $sql .= isset($meta['facture:author']) ? ", facture_author = \"".$meta['facture:author']."\" " : '';
                         $sql .= isset($meta['facture:client']) ? ", facture_client = \"".$meta['facture:client']."\" " : '';
