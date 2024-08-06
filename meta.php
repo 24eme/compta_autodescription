@@ -38,32 +38,20 @@ function get_pdf_prop($file)
     fseek($f, -16384*2, SEEK_END);
     $s = fread($f, 16384*2);
 
-    //Extract cross-reference table and trailer
-    if(!preg_match("/xref[\r\n]+(.*)trailer(.*)startxref/s", $s, $a)) {
-        return false;
-    }
-    $xref = $a[1];
-    $trailer = $a[2];
-
     //Extract Info object number
-    if(!preg_match('/Info ([0-9]+) /', $trailer, $a)) {
+    if(!preg_match('/Info ([0-9]+) /', $s, $a)) {
         return false;
     }
     $object_no = $a[1];
 
     //Extract Info object offset
-    $lines = preg_split("/[\r\n]+/", $xref);
-    $line = $lines[1 + $object_no];
-    $offset = (int)$line;
-    if($offset == 0) {
-        return false;
+    $lines = preg_split("/endobj[\r\n]+/", $s);
+    foreach($lines as $l) {
+        if (strpos($l, $object_no.' ') !== false) {
+            $s_info = $l;
+            break;
+        }
     }
-
-    //Read Info object
-    fseek($f, $offset, SEEK_SET);
-    $s_info = fread($f, 1024);
-    fclose($f);
-
     //Extract properties
     if(!preg_match('/<<(.*)>>/Us', $s_info, $a)) {
         return false;
@@ -76,7 +64,11 @@ function get_pdf_prop($file)
         if (strpos($key, ':')) {
             $edited = true;
         }
-        $prop[$key] = utf8_encode(mbstr2str($a[2][$i]));
+        $value = mbstr2str($a[2][$i]);
+        if (mb_detect_encoding($value, ['UTF-8', 'ISO-8859-1']) == 'ISO-8859-1') {
+            $value = utf8_encode($value);
+        }
+        $prop[$key] = $value;
     }
 
     if (!$edited) {
