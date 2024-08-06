@@ -69,7 +69,7 @@ class Compta extends Controller
         return 1 - count(array_intersect($as, $bs)) / count($as);
     }
 
-    public function associate(Base $f3) {
+    public function associate_banque(Base $f3) {
         $b = new Banque();
         $banque_line = $b->findone(array('id = ?', $f3->get("GET.banque_id")));
         $pieces = [];
@@ -102,7 +102,7 @@ class Compta extends Controller
         $files = [];
         if (!count($pieces)) {
             $f = new File();
-            foreach($f->find(array('piece_id = ?', null)) as $p) {
+            foreach($f->find(array('piece = ?', null)) as $p) {
                 $distance = 0;
                 $nb = 0;
                 $distance += $this->piece_compare($banque_line->raw, $p->fullpath);
@@ -116,8 +116,46 @@ class Compta extends Controller
             }
         }
         uasort($pieces, 'Controllers\Compta::distancesort');
-        $f3->set('content', 'associate.html.php');
+        uasort($files, 'Controllers\Compta::distancesort');
+
+        $f3->set('content', 'associate_banque.html.php');
         echo \View::instance()->render('layout.html.php', 'text/html', compact('pieces', 'banque_line', 'files'));
 
     }
+
+
+    public function associate_piece(Base $f3) {
+        $f = new File();
+        $file = $f->findone(array('md5 = ?', $f3->get("GET.md5")));
+        $extra = $f3->get('GET.extra');
+        $piece = $file->piece;
+        $banques = [];
+        $b = new Banque();
+        foreach ($b->find() as $l) {
+            $distance = 0;
+            $nb = 0;
+            $distance += $this->piece_compare($file->fullpath, $l->label);
+            $nb++;
+            $distance += $this->piece_compare($file->filename, $l->raw);
+            $nb++;
+            if ($extra){
+                $distance += $this->piece_compare($extra, $l->label);
+                $nb++;
+                $distance += $this->piece_compare($extra, $l->raw);
+                $nb++;
+            }
+            $distance += abs(strtotime($l->date) - $file->ctime) / (60*60*24*30);
+            $nb++;
+            if ($piece) {
+                $distance += abs($l->amount - $piece->facture_prix_ttc) / $piece->facture_prix_ttc;
+                $nb++;
+            }
+            $banques[$l->id] = array('distance' => $distance / $nb, 'line' => $l);
+        }
+        uasort($banques, 'Controllers\Compta::distancesort');
+
+        $f3->set('content', 'associate_piece.html.php');
+        echo \View::instance()->render('layout.html.php', 'text/html', compact('file', 'piece', 'banques'));
+    }
+
 }

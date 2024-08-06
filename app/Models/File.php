@@ -20,15 +20,6 @@ class File extends Cortex
         'ctime' => ['type' => \DB\SQL\Schema::DT_INT1],
         'mtime' => ['type' => \DB\SQL\Schema::DT_INT1],
         'md5' => ['type' => \DB\SQL\Schema::DT_TEXT],
-        'piece_id' => ['type' => \DB\SQL\Schema::DT_INT1],
-
-        // Relations
-        /*
-        'other' => [
-            'has-many' => [Turbo::class, 'elements', 'element_turbo',
-                'relField' => 'element_id'
-            ]
-        ],
-        */
+        'piece' => ['belongs-to-one' => Piece::class],
     ];
 }

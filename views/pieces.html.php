@@ -7,9 +7,9 @@
       <div class="list-group list-group-flush border-bottom">
         <?php foreach($pieces as $line): ?>
           <?php if (!$line->banque_id): ?>
-          <a href="/associate?date=<?php echo $line->facture_date?>&libelle=<?php echo $line->facture_libelle;?>&amount=<?php echo abs($line->facture_prix_ttc); ?>" class="list-group-item list-group-item-action py-3 lh-sm" aria-current="true">
+          <a href="/associate_piece?md5=<?php echo $line->md5; ?>" class="list-group-item list-group-item-action py-3 lh-sm" aria-current="true">
           <?php else: ?>
-          <a href="/piece/<?php echo $line->piece_id; ?>" class="list-group-item list-group-item-action py-3 lh-sm" aria-current="true">
+          <a href="/piece/<?php echo $line->piece->id; ?>" class="list-group-item list-group-item-action py-3 lh-sm" aria-current="true">
           <?php endif; ?>
           <div class="d-flex w-100 align-items-center justify-content-between">
             <strong class="mb-1">

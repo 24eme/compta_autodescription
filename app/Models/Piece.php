@@ -32,7 +32,7 @@ class Piece extends Cortex
         'paiement_comment' => ['type' => \DB\SQL\Schema::DT_TEXT],
         'paiement_date' => ['type' => \DB\SQL\Schema::DT_DATE],
         'paiement_proof' => ['type' => \DB\SQL\Schema::DT_TEXT],
-        'banque_id' => ['type' => \DB\SQL\Schema::DT_INT1],
+        'banque' => ['belongs-to-one' => Banque::class],
         'exercice_comptable' => ['type' => \DB\SQL\Schema::DT_TEXT],
         // Relations
         /*

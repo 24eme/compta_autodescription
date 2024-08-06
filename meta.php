@@ -223,7 +223,7 @@ function index_banque($banque_csv, $lastmod) {
         $sql = "UPDATE banque SET ";
         $sql .= 'amount = '.$data[2].', ';
         $sql .= 'type = "'.$data[3].'", ';
-        $sql .= 'banque_id = "'.$data[4].'", ';
+        $sql .= 'banque_account = "'.$data[4].'", ';
         $sql .= 'rdate = "'.$data[5].'", ';
         $sql .= 'vdate = "'.$data[6].'", ';
         $sql .= 'label = "'.$data[7].'" ';
@@ -237,7 +237,7 @@ function index_banque($banque_csv, $lastmod) {
 
 function consolidate($lastmod) {
     global $db;
-    $res = $db->query("SELECT id, date, raw, label FROM banque WHERE piece_id is null");
+    $res = $db->query("SELECT id, date, raw, label FROM banque WHERE piece is null");
     $proof2banqueid = array();
     $md52pieceid = array();
     while ($row = $res->fetchArray()) {
@@ -273,14 +273,14 @@ function consolidate($lastmod) {
             }
         }
         if ($banqueid) {
-            $sql = "UPDATE piece SET banque_id = $banqueid WHERE id = ".$row['id'];
+            $sql = "UPDATE piece SET banque = $banqueid WHERE id = ".$row['id'];
             $db->exec($sql);
-            $sql = "UPDATE banque SET piece_id = ".$row['id']." WHERE id = ".$banqueid;
+            $sql = "UPDATE banque SET piece = ".$row['id']." WHERE id = ".$banqueid;
             $db->exec($sql);
         }
     }
     foreach($md52pieceid as $piece) {
-        $sql = "UPDATE file SET piece_id = ".$piece['id']." WHERE md5 = \"".$piece['md5'].'" AND fullpath = "'.$piece['fullpath'].'"';
+        $sql = "UPDATE file SET piece = ".$piece['id']." WHERE md5 = \"".$piece['md5'].'" AND fullpath = "'.$piece['fullpath'].'"';
         $db->exec($sql);
     }
 }
@@ -312,7 +312,7 @@ $db->exec("CREATE TABLE piece (
     paiement_comment TEXT,
     paiement_date DATE,
     paiement_proof TEXT,
-    banque_id INTEGER,
+    banque INTEGER,
     exercice_comptable TEXT,
     CONSTRAINT constraint_name UNIQUE (md5)
 )");
@@ -326,7 +326,7 @@ $db->exec("CREATE TABLE file (
     ctime INTEGER,
     mtime INTEGER,
     md5 TEXT,
-    piece_id INTEGER
+    piece INTEGER
 )");
 
 $db->exec("CREATE TABLE banque (
@@ -336,11 +336,11 @@ $db->exec("CREATE TABLE banque (
     raw TEXT,
     amount FLOAT,
     type TEXT,
-    banque_id TEXT,
+    banque_account TEXT,
     rdate DATE,
     vdate DATE,
     label TEXT,
-    piece_id INTEGER,
+    piece INTEGER,
     imported_at INTEGER,
     CONSTRAINT constraint_name UNIQUE (date, raw)
 )");

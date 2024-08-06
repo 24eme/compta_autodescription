@@ -5,21 +5,21 @@
           <span class="fs-5 fw-semibold">Les pièces</span>
         </a>
         <div class="list-group list-group-flush border-bottom scrollarea">
-          <?php foreach($files as $line): ?>
-            <?php if (!$line->piece_id): ?>
-            <a href="/associate?date=" class="list-group-item list-group-item-action py-3 lh-sm" aria-current="true">
+          <?php foreach($files as $file): ?>
+            <?php if (!$file->piece): ?>
+            <a href="/associate_piece?md5=<?php echo $file->md5; ?>" class="list-group-item list-group-item-action py-3 lh-sm" aria-current="true">
             <?php else: ?>
-            <a href="/piece/<?php echo $line->piece_id; ?>" class="list-group-item list-group-item-action py-3 lh-sm" aria-current="true">
+            <a href="/piece/<?php echo $file->piece->id; ?>" class="list-group-item list-group-item-action py-3 lh-sm" aria-current="true">
             <?php endif; ?>
             <div class="d-flex w-100 align-items-center justify-content-between">
-              <strong class="mb-1"><?php echo $line->filename; ?></strong>
+              <strong class="mb-1"><?php echo $file->filename; ?></strong>
             </div>
             <div class="row">
-              <div class="col-2 text-center"><?php echo date('Y-m-d', $line->ctime); ?></div>
-              <div class="col-8 mb-1 small"><?php echo $line->fullpath;?></div>
+              <div class="col-2 text-center"><?php echo date('Y-m-d', $file->ctime); ?></div>
+              <div class="col-8 mb-1 small"><?php echo $file->fullpath;?></div>
               <div class="col-2 text-center">
-                <?php if (!$line->piece_id): ?>
-                <span class="badge text-bg-secondary rounded-pill">Pièce manquante</span>
+                <?php if (!$file->piece): ?>
+                  <span class="badge text-bg-secondary rounded-pill">Pièce manquante</span>
                 <?php else: ?>
                   <span class="badge text-bg-success rounded-pill">Pièce saisie</span>
                 <?php endif; ?>

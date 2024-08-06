@@ -22,7 +22,7 @@ class Banque extends Cortex
         'rdate' => ['type' => \DB\SQL\Schema::DT_DATE],
         'vdate' => ['type' => \DB\SQL\Schema::DT_DATE],
         'label' => ['type' => \DB\SQL\Schema::DT_TEXT],
-        'piece_id' => ['type' => \DB\SQL\Schema::DT_INT1],
+        'piece' => ['belongs-to-one' => Piece::class],
         'imported_at' => ['type' => \DB\SQL\Schema::DT_INT1]
         // Relations
         /*
