@@ -2,3 +2,4 @@
 *.swp
 tags
 db/
+config/config.ini

@@ -35,7 +35,7 @@
         </ul>
         <hr>
       </div>
-      <div>
+      <div class="d-flex flex-column" style="flex: 0 0 80%; min-height: 1000px">
           <?php include __DIR__.'/'.Base::instance()->get('content') ?>
       </div>
     </main>

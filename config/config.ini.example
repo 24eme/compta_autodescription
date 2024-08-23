@@ -1,0 +1,7 @@
+[db]
+; create = true
+; dsn = sqlite:../db/mydb.sqlite
+
+[pdf]
+;metadata_url = http://localhost:8888/metadata#local:
+;metadata_prefix = /path/to/pdf

@@ -79,6 +79,16 @@ class Compta extends Controller
     public function associate_banque(Base $f3) {
         $b = new Banque();
         $banque_line = $b->findone(array('id = ?', $f3->get("GET.banque_id")));
+
+        if ($f3->exists('GET.file_md5')) {
+            $f = new File();
+            $file = $f->findone(array('md5 = ? ', $f3->get('GET.file_md5')));
+            $f3->set('sidebar.actif', 'banque');
+            $f3->set('content', 'associate_banque_edit.html.php');
+            $editmeta = $f3->get('PDF_METADATA');
+            echo \View::instance()->render('layout.html.php', 'text/html', compact('file', 'banque_line', 'editmeta'));
+            return;
+        }
         $pieces = [];
         $p = new Piece();
         foreach($p->find(array('facture_prix_ttc = ? AND paiement_date = ?', $banque_line->amount, null)) as $p) {

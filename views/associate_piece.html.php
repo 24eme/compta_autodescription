@@ -12,7 +12,7 @@
     </a>
     <div class="list-group list-group-flush border-bottom">
     <?php foreach($banques as $b): ?>
-    <a href="#" class="list-group-item list-group-item-action py-3 lh-sm" aria-current="true">
+    <a href="associate_banque?banque_id=<?php echo $b['line']->id; ?>&file_md5=<?php echo $file->md5; ?>" class="list-group-item list-group-item-action py-3 lh-sm" aria-current="true">
     <div class="d-flex w-100 align-items-center justify-content-between">
       <strong class="mb-1">
         <?php echo $b['line']->label; ?>
