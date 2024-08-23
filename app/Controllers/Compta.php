@@ -7,7 +7,7 @@ use Models\Banque;
 use Models\Piece;
 use Models\File;
 
-class Compta extends Controller
+class Compta
 {
     public function home(Base $f3)
     {
