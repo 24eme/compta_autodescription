@@ -1,5 +1,6 @@
 <div id="home">
   <div class="d-flex flex-column align-items-stretch">
+    <h3 class="p-3">Factures : saisie des paiements</h3>
     <a href="/" class="p-3 link-body-emphasis text-decoration-none border-bottom">
       <div class="d-flex w-100 align-items-center justify-content-between">
       <strong><?php echo ($piece) ? $piece->facture_client.' : '.$piece->facture_libelle : $file->filename;?></strong>

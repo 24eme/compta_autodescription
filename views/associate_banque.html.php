@@ -1,6 +1,7 @@
 <div id="home">
   <div class="d-flex flex-column align-items-stretch">
     <a href="/" class="p-3 link-body-emphasis text-decoration-none border-bottom">
+      <h3 class="p-3">Activité Bancaire : suivi d'un paiement</h3>
       <div class="d-flex w-100 align-items-center justify-content-between">
       <strong><?php echo $banque_line->label;?></strong>
       <strong><?php echo $banque_line->amount;?> €</strong>
