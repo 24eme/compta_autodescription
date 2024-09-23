@@ -60,48 +60,63 @@ def index_pdf(file, last, conn):
         sql = 'UPDATE file SET filename = "%s", md5 = "%s", mtime = %d WHERE fullpath = "%s" OR md5 = "%s"' % (os.path.basename(file), meta['md5'], meta['mtime'], file, meta['md5'])
         conn.execute(sql)
 
+    sql_update = "UPDATE piece SET "
+    sql_update = sql_update + " filename = \"%s\", extention = \"pdf\" " % file
+    sql_update = sql_update + ', md5 = "%s"' % meta['md5']
+    sql_update = sql_update + ', mtime = %d' % meta['mtime']
+    need_update = False
+    if meta.get('facture:type'):
+        sql_update = sql_update + ", facture_type = \"%s\"" % meta['facture:type']
+        need_update = True
+    if meta.get('facture:author'):
+        sql_update = sql_update + ", facture_author = \"%s\" " % meta['facture:author']
+        need_update = True
+    if meta.get('facture:client'):
+        sql_update = sql_update + ", facture_client = \"%s\" " % meta['facture:client']
+        need_update = True
+    if meta.get('facture:identifier'):
+        sql_update = sql_update + ", facture_identifier = \"%s\" " % meta['facture:identifier']
+        need_update = True
+    if meta.get('facture:date'):
+        sql_update = sql_update + ", facture_date = \"%s\" " % meta['facture:date']
+        need_update = True
+    if meta.get('facture:libelle'):
+        sql_update = sql_update + ", facture_libelle = \"%s\" " % meta['facture:libelle'];
+        need_update = True
+    if meta.get('facture:HT'):
+        sql_update = sql_update + ', facture_prix_ht = %s ' % str(meta['facture:HT']).replace(',', '.');
+        need_update = True
+    if meta.get('facture:TVA'):
+        sql_update = sql_update + ', facture_prix_tax = %s ' % str(meta['facture:TVA']).replace(',', '.');
+        need_update = True
+    if meta.get('facture:TTC'):
+        sql_update = sql_update + ', facture_prix_ttc = %s ' % str(meta['facture:TTC']).replace(',', '.');
+        need_update = True
+    if meta.get('facture:devise'):
+        sql_update = sql_update + ", facture_devise = \"%s\" " % meta['facture:devise']
+        need_update = True
+    if meta.get('paiement:comment'):
+        sql_update = sql_update + ", paiement_comment = \"%s\" " % meta['paiement:comment']
+        need_update = True
+    if meta.get('paiement:proof'):
+        sql_update = sql_update + ", paiement_proof = \"%s\" " % meta['paiement:proof']
+        need_update = True
+    if meta.get('paiement:date'):
+        sql_update = sql_update + ", paiement_date = \"%s\" " % meta['paiement:date']
+        need_update = True
+    sql_update = sql_update + " WHERE fullpath = \"%s\" OR md5 = \"%s\"" % (file, meta['md5'])
+    sql_update = sql_update + " ; "
+
+    if not need_update:
+        return True
+
     res = conn.execute("SELECT * FROM piece WHERE fullpath = \"%s\" OR md5 = \"%s\"" % (file, meta['md5']))
     has_piece = res.fetchone()
+    sql = "INSERT INTO piece (fullpath, filename, md5, ctime, mtime) VALUES (\"%s\", \"%s\", \"%s\", %d, %d) ; " % (file, os.path.basename(file), meta['md5'], meta['ctime'], meta['mtime'])
     if not has_piece:
-        sql = "INSERT INTO piece (fullpath, filename, md5, ctime, mtime) VALUES (\"%s\", \"%s\", \"%s\", %d, %d) ; " % (file, os.path.basename(file), meta['md5'], meta['ctime'], meta['mtime'])
         conn.execute(sql)
 
-    sql = "UPDATE piece SET "
-    sql = sql + " filename = \"%s\", extention = \"pdf\" " % file
-    sql = sql + ', md5 = "%s"' % meta['md5']
-    sql = sql + ', mtime = %d' % meta['mtime']
-
-    if meta.get('facture:type'):
-        sql = sql + ", facture_type = \"%s\"" % meta['facture:type']
-    if meta.get('facture:author'):
-        sql = sql + ", facture_author = \"%s\" " % meta['facture:author']
-    if meta.get('facture:client'):
-        sql = sql + ", facture_client = \"%s\" " % meta['facture:client']
-    if meta.get('facture:identifier'):
-        sql = sql + ", facture_identifier = \"%s\" " % meta['facture:identifier']
-    if meta.get('facture:date'):
-        sql = sql + ", facture_date = \"%s\" " % meta['facture:date']
-    if meta.get('facture:libelle'):
-        sql = sql + ", facture_libelle = \"%s\" " % meta['facture:libelle'];
-    if meta.get('facture:HT'):
-        sql = sql + ', facture_prix_ht = %s ' % str(meta['facture:HT']).replace(',', '.');
-    if meta.get('facture:TVA'):
-        sql = sql + ', facture_prix_tax = %s ' % str(meta['facture:TVA']).replace(',', '.');
-    if meta.get('facture:TTC'):
-        sql = sql + ', facture_prix_ttc = %s ' % str(meta['facture:TTC']).replace(',', '.');
-    if meta.get('facture:devise'):
-        sql = sql + ", facture_devise = \"%s\" " % meta['facture:devise']
-    if meta.get('paiement:comment'):
-        sql = sql + ", paiement_comment = \"%s\" " % meta['paiement:comment']
-    if meta.get('paiement:proof'):
-        sql = sql + ", paiement_proof = \"%s\" " % meta['paiement:proof']
-    if meta.get('paiement:date'):
-        sql = sql + ", paiement_date = \"%s\" " % meta['paiement:date']
-    sql = sql + " WHERE fullpath = \"%s\" OR md5 = \"%s\"" % (file, meta['md5'])
-    sql = sql + " ; "
-
-    conn.execute(sql)
-
+    conn.execute(sql_update)
     return True
 
 def index_banque(csv_url, conn):
