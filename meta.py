@@ -32,7 +32,7 @@ def homogeneise_meta(meta):
 def index_pdf(file, last, conn):
     mtime = os.path.getmtime(file)
     if  mtime < last:
-        return
+        return False
 
     fp = open(file, 'rb')
     parser = PDFParser(fp)
@@ -102,6 +102,8 @@ def index_pdf(file, last, conn):
 
     conn.execute(sql)
 
+    return True
+
 def index_banque(csv_url, conn):
     import csv
     import requests
@@ -118,7 +120,7 @@ def index_banque(csv_url, conn):
         last = fetch[0]
 
     if last and (last - updated_at < 15 * 60):
-        return
+        return False
 
     with requests.get(csv_url, stream=True) as r:
         csv_raw = StringIO(r.text)
@@ -141,10 +143,34 @@ def index_banque(csv_url, conn):
             sql = sql + " WHERE date = \"%s\" AND raw = \"%s\";" % (csv_row[0], csv_row[1])
             conn.execute(sql)
 
-    return
+    return True
+
+def consolidate(conn):
+    print("consolidate")
+
+    res = conn.execute("SELECT id, date, raw, label FROM banque WHERE piece is null");
+    proof2banqueid = {}
+
+#    $md52pieceid = array();
+    for row in res:
+        if row['raw']:
+            proof2banqueid[row['raw'] + 'ø' + row['date']] = row['id'];
+        if row['label']:
+            proof2banqueid[row['label'] + 'ø' +  row['date']] = row['id'];
+
+    res = conn.execute("SELECT id, paiement_proof, paiement_date, fullpath, md5 FROM piece ")
+    for row in res:
+        banqueid = None
+        if row['paiement_proof'] and row['paiement_date']:
+            banqueid = proof2banqueid.get(row['paiement_proof'] + 'ø' + row['paiement_date'])
+        if banqueid:
+            conn.execute("UPDATE piece SET banque = %d WHERE id = %d" % (banqueid,  row['id']) )
+            conn.execute("UPDATE banque SET piece = %d WHERE id = %d" % (row['id'], banqueid) )
+
 
 with sqlite3.connect('db/database.sqlite') as conn:
     conn.row_factory = sqlite3.Row
+    need_consolidate = False
     last = 0
     try:
         res = conn.execute("select mtime - 1 from piece ORDER BY mtime DESC LIMIT 1;");
@@ -157,8 +183,10 @@ with sqlite3.connect('db/database.sqlite') as conn:
         conn.execute("CREATE TABLE banque (id INTEGER PRIMARY KEY, date DATE, raw TEXT, amount FLOAT, type TEXT, banque_account TEXT, rdate DATE, vdate DATE, label TEXT, piece INTEGER, ctime INTEGER, mtime INTEGER, CONSTRAINT constraint_name UNIQUE (date, raw) );");
 
     for file in glob.glob(sys.argv[1]+'/**/*pdf', recursive=True):
-        index_pdf(file, last, conn)
+        need_consolidate = index_pdf(file, last, conn) or need_consolidate
 
-    index_banque('https://raw.githubusercontent.com/24eme/banque/master/data/history.csv', conn)
+    need_consolidate = index_banque('https://raw.githubusercontent.com/24eme/banque/master/data/history.csv', conn) or need_consolidate
 
-    conn.commit()
+    if not need_consolidate:
+        consolidate(conn)
+        conn.commit()
