@@ -48,28 +48,28 @@ def index_pdf(file, last, conn):
     for chunk in iter(lambda: fp.read(4096), b""):
         hash_md5.update(chunk)
     meta['md5'] = hash_md5.hexdigest()
-
+    meta['ctime'] = os.path.getctime(file)
     meta['mtime'] = mtime
-
 
     res = conn.execute("SELECT id FROM file WHERE fullpath = \"%s\" OR md5 = \"%s\"" % (file, meta['md5']))
     has_file = res.fetchone()
     if not has_file:
-        sql = "INSERT INTO file (fullpath, filename, md5, mtime) VALUES (\"%s\", \"%s\", \"%s\", %d ) ; " % (file, os.path.basename(file), meta['md5'], meta['mtime'])
+        sql = "INSERT INTO file (fullpath, filename, md5, ctime, mtime) VALUES (\"%s\", \"%s\", \"%s\", %d, %d) ; " % (file, os.path.basename(file), meta['md5'], meta['ctime'], meta['mtime'])
         conn.execute(sql)
     else:
-        sql = 'UPDATE file SET filename = "%s", md5 = "%s", mtime = %d) WHERE fullpath = "%s" OR md5 = "%s"' % (os.path.basename(file), meta['md5'], meta['mtime'], file, meta['md5'])
+        sql = 'UPDATE file SET filename = "%s", md5 = "%s", mtime = %d WHERE fullpath = "%s" OR md5 = "%s"' % (os.path.basename(file), meta['md5'], meta['mtime'], file, meta['md5'])
+        conn.execute(sql)
 
     res = conn.execute("SELECT * FROM piece WHERE fullpath = \"%s\" OR md5 = \"%s\"" % (file, meta['md5']))
     has_piece = res.fetchone()
     if not has_piece:
-        sql = "INSERT INTO piece (fullpath, filename, md5, mtime) VALUES (\"%s\", \"%s\", \"%s\", %d ) ; " % (file, os.path.basename(file), meta['md5'], meta['mtime'])
+        sql = "INSERT INTO piece (fullpath, filename, md5, ctime, mtime) VALUES (\"%s\", \"%s\", \"%s\", %d, %d) ; " % (file, os.path.basename(file), meta['md5'], meta['ctime'], meta['mtime'])
         conn.execute(sql)
 
     sql = "UPDATE piece SET "
     sql = sql + " filename = \"%s\", extention = \"pdf\" " % file
-    sql = sql + ", md5 = '%s'" % meta['md5']
-    sql = sql + ", mtime = '%d'" % meta['mtime']
+    sql = sql + ', md5 = "%s"' % meta['md5']
+    sql = sql + ', mtime = %d' % meta['mtime']
 
     if meta.get('facture:type'):
         sql = sql + ", facture_type = \"%s\"" % meta['facture:type']
@@ -103,14 +103,19 @@ def index_pdf(file, last, conn):
     conn.execute(sql)
 
 with sqlite3.connect('db/database.sqlite') as conn:
+    conn.row_factory = sqlite3.Row
+    last = 0
     try:
         res = conn.execute("select mtime - 1 from piece ORDER BY mtime DESC LIMIT 1;");
-        last = res.fetchone()[0]
+        row = res.fetchone()
+        if row:
+            last = row[0]
     except sqlite3.OperationalError:
-        conn.execute("CREATE TABLE piece ( id INTEGER PRIMARY KEY, filename TEXT, fullpath TEXT UNIQUE, extention TEXT, size INTEGER, mtime INTEGER, md5 TEXT, facture_type TEXT, facture_author TEXT, facture_client TEXT, facture_identifier TEXT, facture_date DATE, facture_libelle TEXT, facture_prix_ht FLOAT, facture_prix_tax FLOAT, facture_prix_ttc FLOAT, facture_devise TEXT, paiement_comment TEXT, paiement_date DATE, paiement_proof TEXT, banque INTEGER, exercice_comptable TEXT, CONSTRAINT constraint_name UNIQUE (md5) );");
+        conn.execute("CREATE TABLE piece ( id INTEGER PRIMARY KEY, filename TEXT, fullpath TEXT UNIQUE, extention TEXT, size INTEGER, ctime INTEGER, mtime INTEGER, md5 TEXT, facture_type TEXT, facture_author TEXT, facture_client TEXT, facture_identifier TEXT, facture_date DATE, facture_libelle TEXT, facture_prix_ht FLOAT, facture_prix_tax FLOAT, facture_prix_ttc FLOAT, facture_devise TEXT, paiement_comment TEXT, paiement_date DATE, paiement_proof TEXT, banque INTEGER, exercice_comptable TEXT, CONSTRAINT constraint_name UNIQUE (md5) );");
         conn.execute("CREATE TABLE file (id INTEGER PRIMARY KEY, filename TEXT, fullpath TEXT UNIQUE, extention TEXT, size INTEGER, ctime INTEGER, mtime INTEGER, md5 TEXT, piece INTEGER);");
-        conn.execute("CREATE TABLE banque (id INTEGER PRIMARY KEY, date DATE, mtime INTEGER, raw TEXT, amount FLOAT, type TEXT, banque_account TEXT, rdate DATE, vdate DATE, label TEXT, piece INTEGER, imported_at INTEGER, CONSTRAINT constraint_name UNIQUE (date, raw) );");
-        last = 0
+        conn.execute("CREATE TABLE banque (id INTEGER PRIMARY KEY, date DATE, raw TEXT, amount FLOAT, type TEXT, banque_account TEXT, rdate DATE, vdate DATE, label TEXT, piece INTEGER, ctime INTEGER, mtime INTEGER, CONSTRAINT constraint_name UNIQUE (date, raw) );");
 
     for file in glob.glob(sys.argv[1]+'/**/*pdf', recursive=True):
         index_pdf(file, last, conn)
+
+    conn.commit()
