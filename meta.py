@@ -161,9 +161,21 @@ def consolidate(conn):
     res = conn.execute("SELECT id, paiement_proof, paiement_date, fullpath, md5 FROM piece ")
     for row in res:
         banqueid = None
-        if row['paiement_proof'] and row['paiement_date']:
+        if not row['paiement_proof']:
+            continue
+        print([row['paiement_proof'] + 'ø' + row['paiement_date']])
+        if row['paiement_date']:
             banqueid = proof2banqueid.get(row['paiement_proof'] + 'ø' + row['paiement_date'])
+        if not banqueid:
+            ids = []
+            for pkey in proof2banqueid:
+                (label, date) = pkey.split('ø')
+                if label.find(row['paiement_proof']) != -1 or row['paiement_proof'].find(label) != -1:
+                    ids.append(proof2banqueid[pkey])
+            if len(ids) == 1:
+                banqueid = ids[0]
         if banqueid:
+            print(["UPDATE piece SET banque = %d WHERE id = %d" % (banqueid,  row['id']), "UPDATE banque SET piece = %d WHERE id = %d" % (row['id'], banqueid) ])
             conn.execute("UPDATE piece SET banque = %d WHERE id = %d" % (banqueid,  row['id']) )
             conn.execute("UPDATE banque SET piece = %d WHERE id = %d" % (row['id'], banqueid) )
 
