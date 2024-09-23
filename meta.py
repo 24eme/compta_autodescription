@@ -12,13 +12,21 @@ def homogeneise_meta(meta):
                 meta[m] = meta[m][2:].decode('utf-16le')
             else:
                 try:
-                    meta[m] = meta[m].decode('latin1')
+                    meta[m] = meta[m].decode('utf-8')
                 except UnicodeDecodeError:
                     try:
-                        meta[m] = meta[m].decode('utf-8')
+                        meta[m] = meta[m].decode('iso8859-1')
                     except UnicodeDecodeError:
-                        meta[m] = meta[m].decode('ascii')
-
+                        try:
+                            meta[m] = meta[m].decode('latin1')
+                        except UnicodeDecodeError:
+                            meta[m] = meta[m].decode('ascii')
+        if str(meta[m]).find('Ã') == -1:
+            continue
+        try:
+            meta[m] = meta[m].encode('iso8859-1').decode('utf-8')
+        except:
+            raise
     return meta
 
 def index_pdf(file, last, conn):
