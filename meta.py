@@ -102,6 +102,47 @@ def index_pdf(file, last, conn):
 
     conn.execute(sql)
 
+def index_banque(csv_url, conn):
+    import csv
+    import requests
+    from io import StringIO
+    import datetime
+
+    imported_at = datetime.datetime.now().timestamp()
+    updated_at = imported_at
+
+    last = None
+    res = conn.execute("select mtime from banque ORDER BY mtime DESC LIMIT 1;");
+    fetch = res.fetchone()
+    if fetch:
+        last = fetch[0]
+
+    if last and (last - updated_at < 15 * 60):
+        return
+
+    with requests.get(csv_url, stream=True) as r:
+        csv_raw = StringIO(r.text)
+        csv_reader = csv.reader(csv_raw, delimiter=",")
+        for csv_row in csv_reader:
+            if (csv_row[0] == 'date') or (len(csv_row) < 7):
+                continue
+            res = conn.execute("SELECT id FROM banque WHERE date = \"%s\" AND raw = \"%s\";" % (csv_row[0], csv_row[1]))
+            row = res.fetchone()
+            if not row or not row[0]:
+                conn.execute("INSERT INTO banque (date, raw, ctime) VALUES (\"%s\", \"%s\" , \"%s\")" % (csv_row[0], csv_row[1], imported_at) )
+            sql = "UPDATE banque SET "
+            sql = sql + 'amount = %s, ' % csv_row[2]
+            sql = sql + 'type = "%s", ' % csv_row[3]
+            sql = sql + 'banque_account = "%s", ' % csv_row[4]
+            sql = sql + 'rdate = "%s", ' % csv_row[5]
+            sql = sql + 'vdate = "%s", ' % csv_row[6]
+            sql = sql + 'label = "%s", ' % csv_row[7]
+            sql = sql + 'mtime = %d' % updated_at
+            sql = sql + " WHERE date = \"%s\" AND raw = \"%s\";" % (csv_row[0], csv_row[1])
+            conn.execute(sql)
+
+    return
+
 with sqlite3.connect('db/database.sqlite') as conn:
     conn.row_factory = sqlite3.Row
     last = 0
@@ -117,5 +158,7 @@ with sqlite3.connect('db/database.sqlite') as conn:
 
     for file in glob.glob(sys.argv[1]+'/**/*pdf', recursive=True):
         index_pdf(file, last, conn)
+
+    index_banque('https://raw.githubusercontent.com/24eme/banque/master/data/history.csv', conn)
 
     conn.commit()
