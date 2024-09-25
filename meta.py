@@ -182,7 +182,6 @@ def consolidate(conn):
         banqueid = None
         if not row['paiement_proof']:
             continue
-        print([row['paiement_proof'] + 'ø' + row['paiement_date']])
         if row['paiement_date']:
             banqueid = proof2banqueid.get(row['paiement_proof'] + 'ø' + row['paiement_date'])
         if not banqueid:
