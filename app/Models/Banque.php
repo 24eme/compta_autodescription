@@ -9,7 +9,7 @@ class Banque extends Cortex
     use EmptyArrayFindTrait;
 
     protected $db = 'DB';
-    protected $table = 'banque';
+    protected $table = 'pdf_banque';
 
     protected $fieldConf = [
         'id' => ['type' => \DB\SQL\Schema::DT_INT1, 'primary' => true],

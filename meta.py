@@ -51,17 +51,17 @@ def index_pdf(file, last, conn):
     meta['ctime'] = os.path.getctime(file)
     meta['mtime'] = mtime
 
-    res = conn.execute("SELECT id FROM file WHERE fullpath = \"%s\" OR md5 = \"%s\"" % (file, meta['md5']))
+    res = conn.execute("SELECT id FROM pdf_file WHERE fullpath = \"%s\" OR md5 = \"%s\"" % (file, meta['md5']))
     has_file = res.fetchone()
     if not has_file:
-        sql = "INSERT INTO file (fullpath, filename, md5, ctime, mtime) VALUES (\"%s\", \"%s\", \"%s\", %d, %d) ; " % (file, os.path.basename(file), meta['md5'], meta['ctime'], meta['mtime'])
+        sql = "INSERT INTO pdf_file (fullpath, filename, md5, ctime, mtime) VALUES (\"%s\", \"%s\", \"%s\", %d, %d) ; " % (file, os.path.basename(file), meta['md5'], meta['ctime'], meta['mtime'])
         conn.execute(sql)
     else:
-        sql = 'UPDATE file SET filename = "%s", md5 = "%s", mtime = %d WHERE fullpath = "%s" OR md5 = "%s"' % (os.path.basename(file), meta['md5'], meta['mtime'], file, meta['md5'])
+        sql = 'UPDATE pdf_file SET filename = "%s", md5 = "%s", mtime = %d WHERE fullpath = "%s" OR md5 = "%s"' % (os.path.basename(file), meta['md5'], meta['mtime'], file, meta['md5'])
         conn.execute(sql)
 
-    sql_update = "UPDATE piece SET "
-    sql_update = sql_update + " filename = \"%s\", extention = \"pdf\" " % file
+    sql_update = "UPDATE pdf_piece SET "
+    sql_update = sql_update + " filename = \"%s\", extention = \"pdf\" " % os.path.basename(file)
     sql_update = sql_update + ', md5 = "%s"' % meta['md5']
     sql_update = sql_update + ', mtime = %d' % meta['mtime']
     need_update = False
@@ -110,13 +110,14 @@ def index_pdf(file, last, conn):
     if not need_update:
         return True
 
-    res = conn.execute("SELECT * FROM piece WHERE fullpath = \"%s\" OR md5 = \"%s\"" % (file, meta['md5']))
+    res = conn.execute("SELECT * FROM pdf_piece WHERE fullpath = \"%s\" OR md5 = \"%s\"" % (file, meta['md5']))
     has_piece = res.fetchone()
-    sql = "INSERT INTO piece (fullpath, filename, md5, ctime, mtime) VALUES (\"%s\", \"%s\", \"%s\", %d, %d) ; " % (file, os.path.basename(file), meta['md5'], meta['ctime'], meta['mtime'])
+    sql = "INSERT INTO pdf_piece (fullpath, filename, md5, ctime, mtime) VALUES (\"%s\", \"%s\", \"%s\", %d, %d) ; " % (file, os.path.basename(file), meta['md5'], meta['ctime'], meta['mtime'])
     if not has_piece:
         conn.execute(sql)
 
     conn.execute(sql_update)
+    conn.commit()
     return True
 
 def index_banque(csv_url, conn):
@@ -129,7 +130,7 @@ def index_banque(csv_url, conn):
     updated_at = imported_at
 
     last = None
-    res = conn.execute("select mtime from banque ORDER BY mtime DESC LIMIT 1;");
+    res = conn.execute("SELECT mtime FROM pdf_banque ORDER BY mtime DESC LIMIT 1;");
     fetch = res.fetchone()
     if fetch:
         last = fetch[0]
@@ -143,11 +144,11 @@ def index_banque(csv_url, conn):
         for csv_row in csv_reader:
             if (csv_row[0] == 'date') or (len(csv_row) < 7):
                 continue
-            res = conn.execute("SELECT id FROM banque WHERE date = \"%s\" AND raw = \"%s\";" % (csv_row[0], csv_row[1]))
+            res = conn.execute("SELECT id FROM pdf_banque WHERE date = \"%s\" AND raw = \"%s\";" % (csv_row[0], csv_row[1]))
             row = res.fetchone()
             if not row or not row[0]:
-                conn.execute("INSERT INTO banque (date, raw, ctime) VALUES (\"%s\", \"%s\" , \"%s\")" % (csv_row[0], csv_row[1], imported_at) )
-            sql = "UPDATE banque SET "
+                conn.execute("INSERT INTO pdf_banque (date, raw, ctime) VALUES (\"%s\", \"%s\" , \"%s\")" % (csv_row[0], csv_row[1], imported_at) )
+            sql = "UPDATE pdf_banque SET "
             sql = sql + 'amount = %s, ' % csv_row[2]
             sql = sql + 'type = "%s", ' % csv_row[3]
             sql = sql + 'banque_account = "%s", ' % csv_row[4]
@@ -161,9 +162,7 @@ def index_banque(csv_url, conn):
     return True
 
 def consolidate(conn):
-    print("consolidate")
-
-    res = conn.execute("SELECT id, date, raw, label FROM banque WHERE piece is null");
+    res = conn.execute("SELECT id, date, raw, label FROM pdf_banque");
     proof2banqueid = {}
 
 #    $md52pieceid = array();
@@ -173,7 +172,7 @@ def consolidate(conn):
         if row['label']:
             proof2banqueid[row['label'] + 'ø' +  row['date']] = row['id'];
 
-    res = conn.execute("SELECT id, paiement_proof, paiement_date, fullpath, md5 FROM piece ")
+    res = conn.execute("SELECT id, paiement_proof, paiement_date, fullpath, md5 FROM pdf_piece")
     for row in res:
         banqueid = None
         if not row['paiement_proof']:
@@ -190,24 +189,23 @@ def consolidate(conn):
             if len(ids) == 1:
                 banqueid = ids[0]
         if banqueid:
-            print(["UPDATE piece SET banque = %d WHERE id = %d" % (banqueid,  row['id']), "UPDATE banque SET piece = %d WHERE id = %d" % (row['id'], banqueid) ])
-            conn.execute("UPDATE piece SET banque = %d WHERE id = %d" % (banqueid,  row['id']) )
-            conn.execute("UPDATE banque SET piece = %d WHERE id = %d" % (row['id'], banqueid) )
-
+            conn.execute("UPDATE pdf_piece SET banque_id = %d WHERE id = %d" % (banqueid,  row['id']) )
+            conn.execute("UPDATE pdf_banque SET piece_id = %d WHERE id = %d" % (row['id'], banqueid) )
+    conn.commit()
 
 with sqlite3.connect('db/database.sqlite') as conn:
     conn.row_factory = sqlite3.Row
     need_consolidate = False
     last = 0
     try:
-        res = conn.execute("select mtime - 1 from piece ORDER BY mtime DESC LIMIT 1;");
+        res = conn.execute("SELECT mtime FROM pdf_file WHERE fullpath LIKE \"" + sys.argv[1] + "%\" ORDER BY mtime DESC LIMIT 1;");
         row = res.fetchone()
         if row:
             last = row[0]
     except sqlite3.OperationalError:
-        conn.execute("CREATE TABLE piece ( id INTEGER PRIMARY KEY, filename TEXT, fullpath TEXT UNIQUE, extention TEXT, size INTEGER, ctime INTEGER, mtime INTEGER, md5 TEXT, facture_type TEXT, facture_author TEXT, facture_client TEXT, facture_identifier TEXT, facture_date DATE, facture_libelle TEXT, facture_prix_ht FLOAT, facture_prix_tax FLOAT, facture_prix_ttc FLOAT, facture_devise TEXT, paiement_comment TEXT, paiement_date DATE, paiement_proof TEXT, banque INTEGER, exercice_comptable TEXT, CONSTRAINT constraint_name UNIQUE (md5) );");
-        conn.execute("CREATE TABLE file (id INTEGER PRIMARY KEY, filename TEXT, fullpath TEXT UNIQUE, extention TEXT, size INTEGER, ctime INTEGER, mtime INTEGER, md5 TEXT, piece INTEGER);");
-        conn.execute("CREATE TABLE banque (id INTEGER PRIMARY KEY, date DATE, raw TEXT, amount FLOAT, type TEXT, banque_account TEXT, rdate DATE, vdate DATE, label TEXT, piece INTEGER, ctime INTEGER, mtime INTEGER, CONSTRAINT constraint_name UNIQUE (date, raw) );");
+        conn.execute("CREATE TABLE pdf_file (id INTEGER PRIMARY KEY, filename TEXT, fullpath TEXT UNIQUE, extention TEXT, size INTEGER, ctime INTEGER, mtime INTEGER, md5 TEXT, piece_id INTEGER);");
+        conn.execute("CREATE TABLE pdf_piece (id INTEGER PRIMARY KEY, filename TEXT, fullpath TEXT UNIQUE, extention TEXT, size INTEGER, ctime INTEGER, mtime INTEGER, md5 TEXT, facture_type TEXT, facture_author TEXT, facture_client TEXT, facture_identifier TEXT, facture_date DATE, facture_libelle TEXT, facture_prix_ht FLOAT, facture_prix_tax FLOAT, facture_prix_ttc FLOAT, facture_devise TEXT, paiement_comment TEXT, paiement_date DATE, paiement_proof TEXT, banque_id INTEGER, exercice_comptable TEXT, CONSTRAINT constraint_name UNIQUE (md5) );");
+        conn.execute("CREATE TABLE pdf_banque (id INTEGER PRIMARY KEY, date DATE, raw TEXT, amount FLOAT, type TEXT, banque_account TEXT, rdate DATE, vdate DATE, label TEXT, piece_id INTEGER, ctime INTEGER, mtime INTEGER, CONSTRAINT constraint_name UNIQUE (date, raw) );");
 
     for file in glob.glob(sys.argv[1]+'/**/*pdf', recursive=True):
         need_consolidate = index_pdf(file, last, conn) or need_consolidate

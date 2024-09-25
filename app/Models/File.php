@@ -9,7 +9,7 @@ class File extends Cortex
     use EmptyArrayFindTrait;
 
     protected $db = 'DB';
-    protected $table = 'file';
+    protected $table = 'pdf_file';
 
     protected $fieldConf = [
         'id' => ['type' => \DB\SQL\Schema::DT_INT1,  'primary' => true],

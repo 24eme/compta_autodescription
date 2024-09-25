@@ -9,7 +9,7 @@ class Piece extends Cortex
     use EmptyArrayFindTrait;
 
     protected $db = 'DB';
-    protected $table = 'piece';
+    protected $table = 'pdf_piece';
 
     protected $fieldConf = [
         'id' => ['type' => \DB\SQL\Schema::DT_INT1, 'primary' => true],
