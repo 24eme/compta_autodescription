@@ -31,7 +31,7 @@ def homogeneise_meta(meta):
 
 def index_pdf(file, last, conn):
     mtime = os.path.getmtime(file)
-    if  mtime < last:
+    if  mtime <= last:
         return False
 
     fp = open(file, 'rb')
@@ -135,7 +135,7 @@ def index_banque(csv_url, conn):
     if fetch:
         last = fetch[0]
 
-    if last and (last - updated_at < 15 * 60):
+    if last and (updated_at - last) < 15 * 60:
         return False
 
     with requests.get(csv_url, stream=True) as r:
@@ -159,6 +159,10 @@ def index_banque(csv_url, conn):
             sql = sql + " WHERE date = \"%s\" AND raw = \"%s\";" % (csv_row[0], csv_row[1])
             conn.execute(sql)
 
+    if last:
+        res = conn.execute("UPDATE pdf_banque SET mtime = %d WHERE mtime = %d LIMIT 1" % (updated_at, last));
+
+    conn.commit()
     return True
 
 def consolidate(conn):
@@ -212,6 +216,6 @@ with sqlite3.connect('db/database.sqlite') as conn:
 
     need_consolidate = index_banque('https://raw.githubusercontent.com/24eme/banque/master/data/history.csv', conn) or need_consolidate
 
-    if not need_consolidate:
+    if need_consolidate:
         consolidate(conn)
         conn.commit()
