@@ -169,15 +169,16 @@ def consolidate(conn):
     res = conn.execute("SELECT id, date, raw, label FROM pdf_banque");
     proof2banqueid = {}
 
-#    $md52pieceid = array();
     for row in res:
         if row['raw']:
             proof2banqueid[row['raw'] + 'ø' + row['date']] = row['id'];
         if row['label']:
             proof2banqueid[row['label'] + 'ø' +  row['date']] = row['id'];
 
+    md52pid = {}
     res = conn.execute("SELECT id, paiement_proof, paiement_date, fullpath, md5 FROM pdf_piece")
     for row in res:
+        md52pid[row['md5']] = row['id']
         banqueid = None
         if not row['paiement_proof']:
             continue
@@ -196,6 +197,13 @@ def consolidate(conn):
             conn.execute("UPDATE pdf_piece SET banque_id = %d WHERE id = %d" % (banqueid,  row['id']) )
             conn.execute("UPDATE pdf_banque SET piece_id = %d WHERE id = %d" % (row['id'], banqueid) )
     conn.commit()
+
+    res = conn.execute("SELECT id, md5 FROM pdf_file WHERE piece_id IS NULL")
+    for row in res:
+        if md52pid.get(row['md5']):
+            res = conn.execute("UPDATE pdf_file SET piece_id = '%s' WHERE id = %d" % (md52pid[row['md5']], row['id']))
+    conn.commit()
+
 
 with sqlite3.connect('db/database.sqlite') as conn:
     conn.row_factory = sqlite3.Row
