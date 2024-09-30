@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% block title %}Edition d'une piece{% endblock %}
+{% block content %}
+<h1>Edition de la pièce</h1>
+{% if banque %}
+<div>
+  <a href="../pieces"><< Retour aux pieces</a>
+</div>
+<div>
+  <p>{{ banque.date|date:"Y-m-d" }}</p>
+  <p>{{ banque.raw }}</p>
+</div>
+{% else %}
+<div>
+  <a href="../files"><< Retour aux fichiers</a>
+</div>
+{% endif %}
+</div>
+<div style="height: 1024px; width: 100%">
+  <iframe src="{{ pdf_edit_full_url }}" style="height: 100%; width: 100%">
+  </iframe>
+</div>
+{% if banque %}
+<div>
+  <p>{{ banque.date|date:"Y-m-d" }}</p>
+  <p>{{ banque.raw }}</p>
+</div>
+<div>
+  <a href="../pieces"><< Retour aux pieces</a>
+</div>
+{% else %}
+<div>
+  <a href="../files"><< Retour aux fichiers</a>
+</div>
+{% endif %}
+{% endblock %}

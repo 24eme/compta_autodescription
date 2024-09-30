@@ -2,6 +2,7 @@ from pdfminer.pdfparser import PDFParser
 from pdfminer.pdfdocument import PDFDocument
 import glob, sys, os, hashlib
 import sqlite3
+import re
 
 def homogeneise_meta(meta):
     for m in meta:
@@ -77,6 +78,9 @@ def index_pdf(file, last, conn):
     if meta.get('facture:identifier'):
         sql_update = sql_update + ", facture_identifier = \"%s\" " % meta['facture:identifier']
         need_update = True
+    elif meta.get('facture:id'):
+        sql_update = sql_update + ", facture_identifier = \"%s\" " % meta['facture:id']
+        need_update = True
     if meta.get('facture:date'):
         sql_update = sql_update + ", facture_date = \"%s\" " % meta['facture:date']
         need_update = True
@@ -110,6 +114,7 @@ def index_pdf(file, last, conn):
     if not need_update:
         return True
 
+
     res = conn.execute("SELECT * FROM pdf_piece WHERE fullpath = \"%s\" OR md5 = \"%s\"" % (file, meta['md5']))
     has_piece = res.fetchone()
     sql = "INSERT INTO pdf_piece (fullpath, filename, md5, ctime, mtime) VALUES (\"%s\", \"%s\", \"%s\", %d, %d) ; " % (file, os.path.basename(file), meta['md5'], meta['ctime'], meta['mtime'])
@@ -117,6 +122,7 @@ def index_pdf(file, last, conn):
         conn.execute(sql)
 
     conn.execute(sql_update)
+    print([sql_update])
     conn.commit()
     return True
 
@@ -135,8 +141,8 @@ def index_banque(csv_url, conn):
     if fetch:
         last = fetch[0]
 
-    if last and (updated_at - last) < 15 * 60:
-        return False
+    #if last and (updated_at - last) < 15 * 60:
+    #    return False
 
     with requests.get(csv_url, stream=True) as r:
         csv_raw = StringIO(r.text)
@@ -144,6 +150,8 @@ def index_banque(csv_url, conn):
         for csv_row in csv_reader:
             if (csv_row[0] == 'date') or (len(csv_row) < 7):
                 continue
+            csv_row[1] = re.sub(r'  +', ' ', csv_row[1])
+            csv_row[7] = re.sub(r'  +', ' ', csv_row[7])
             res = conn.execute("SELECT id FROM pdf_banque WHERE date = \"%s\" AND raw = \"%s\";" % (csv_row[0], csv_row[1]))
             row = res.fetchone()
             if not row or not row[0]:
@@ -171,9 +179,9 @@ def consolidate(conn):
 
     for row in res:
         if row['raw']:
-            proof2banqueid[row['raw'] + 'ø' + row['date']] = row['id'];
+            proof2banqueid[re.sub(r'  *', ' ', row['raw']) + 'ø' + row['date']] = row['id'];
         if row['label']:
-            proof2banqueid[row['label'] + 'ø' +  row['date']] = row['id'];
+            proof2banqueid[re.sub(r'  *', ' ', row['label']) + 'ø' +  row['date']] = row['id'];
 
     md52pid = {}
     res = conn.execute("SELECT id, paiement_proof, paiement_date, fullpath, md5 FROM pdf_piece")
@@ -182,13 +190,14 @@ def consolidate(conn):
         banqueid = None
         if not row['paiement_proof']:
             continue
+        paiement_proof = re.sub(r'  *', ' ', row['paiement_proof'])
         if row['paiement_date']:
-            banqueid = proof2banqueid.get(row['paiement_proof'] + 'ø' + row['paiement_date'])
+            banqueid = proof2banqueid.get(paiement_proof + 'ø' + row['paiement_date'])
         if not banqueid:
             ids = []
             for pkey in proof2banqueid:
                 (label, date) = pkey.split('ø')
-                if label.find(row['paiement_proof']) != -1 or row['paiement_proof'].find(label) != -1:
+                if label.find(paiement_proof) != -1 or paiement_proof.find(label) != -1:
                     ids.append(proof2banqueid[pkey])
             if len(ids) == 1:
                 banqueid = ids[0]
@@ -223,6 +232,6 @@ with sqlite3.connect('db/database.sqlite') as conn:
 
     need_consolidate = index_banque('https://raw.githubusercontent.com/24eme/banque/master/data/history.csv', conn) or need_consolidate
 
-    if need_consolidate:
+    if True or need_consolidate:
         consolidate(conn)
         conn.commit()

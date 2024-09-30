@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+{% block title %}Rapprocher une pièce de la banque{% endblock %}
+{% block content %}
+<h1>Lien entre pièce et banques</h1>
+<table>
+  <tr>
+    <td span="4"><h3>Banque</h3></td>
+  </tr>
+  <tr>
+    <td><div>{{ banque.date|date:"d/m/Y" }}</div></td>
+    <td><div>{{ banque.label }}</div></td>
+    <td><div class="text-end">{{ banque.amount }} €</div></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td span="4"><h3>Pièces</h3></td>
+  </tr>
+  {% for md5, metafile in pieces.items %}
+  <tr>
+    {% if metafile.piece %}
+    <td><div>{{ metafile.piece.facture_date|date:"d/m/Y" }}</div></td>
+    <td>
+      <div>{{ metafile.piece.facture_client }}
+        {% if metafile.piece.facture_identifier %}
+        - Facture {{ metafile.piece.facture_identifier }}
+        {% endif %}
+      </div>
+      <div>{{ metafile.piece.facture_libelle }}</div>
+    </td>
+    <td><div class="text-end">{{ metafile.piece.facture_prix_ttc }} €</div></td>
+    {% elif metafile.file %}
+    <td><div>{{ metafile.file|date:"d/m/Y" }}</div></td>
+    <td>
+      <div>
+        {{ metafile.file.filename }}
+      </div>
+      <div>{{ metafile.file.filepath }}</div>
+    </td>
+    <td></td>
+    {% endif %}
+    <td><a href="../pdf/{{ md5 }}?banque_id={{ banque.id }}">Editer la pièce</a></td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

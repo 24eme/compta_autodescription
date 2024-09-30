@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block title %}Liste des factures{% endblock %}
+{% block content %}
+<h1>Les fichiers</h1>
+<table>
+{% for f in files %}
+    <tr>
+      <td>
+        <div class="">{{ f.date }}</div>
+      </td>
+      <td>
+        <div class="">{{ f.filename }}</div>
+        <div class="text-muted">{{ f.filepath }}</div>
+        <div> &nbsp; </div>
+      </td>
+      <td>
+        <div class="text-center">
+        {% if not f.piece_id %}
+        <span class="badge text-bg-warning rounded-pill">Piece non saisie</span>
+        {% elif f.piece.paiement_proof %}
+          <span class="badge text-bg-success rounded-pill">piece rapprochée</span>
+        {% else %}
+          <span class="badge text-bg-secondary rounded-pill">piece saisie</span>
+        {% endif %}
+        </div>
+        <div> &nbsp; </div>
+      </td>
+      <td>
+        {% if not f.piece_id %}
+        <a href="./pdf/{{ f.md5 }}">Editer cette pièce</a>
+        {% elif f.piece.paiement_proof %}
+        <a href="./pdf/{{ f.md5 }}">Editer cette pièce</a>
+        {% else %}
+        <a href="./piece/{{ f.md5 }}">Rapprocher cette pièce</a>
+        {% endif %}
+      </td>
+      <td>
+      </td>
+    </tr>
+{% endfor %}
+</table>
+{% endblock %}

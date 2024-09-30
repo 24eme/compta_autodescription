@@ -4,13 +4,17 @@
 
 Installation des dépendances :
 ```
-sudo apt-get install php
+sudo apt-get install python
+virtualenv env
+. env/bin/activate
+pip install -r requirements.txt
 ```
 
 Lancer le projet, via la console :
 
 ```
-php -S localhost:8000 -t public
+. env/bin/activate
+COMPTA_PDF_URL="http://localhost:8888/metadata#local:" COMPTA_PDF_BASE_PATH="/path/to/compta" python manage.py runserver
 ```
 
 ## License

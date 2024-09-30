@@ -1,0 +1,56 @@
+from django.db import models
+
+class Banque(models.Model):
+    date = models.DateField(null=True)
+    raw = models.TextField(null=True)
+    amount = models.FloatField(null=True)
+    type = models.TextField(null=True)
+    banque_account = models.TextField(null=True)
+    rdate = models.DateField(null=True)
+    vdate = models.DateField(null=True)
+    label = models.TextField(null=True)
+    piece_id = models.IntegerField(null=True)
+    ctime = models.IntegerField(null=True)
+    mtime = models.IntegerField(null=True)
+    class Meta:
+        unique_together = ('date', 'raw')
+
+class Piece(models.Model):
+    filename = models.TextField(null=True)
+    fullpath = models.TextField(null=True)
+    extention = models.TextField(null=True)
+    size = models.IntegerField(null=True)
+    ctime = models.IntegerField(null=True)
+    mtime = models.IntegerField(null=True)
+    md5 = models.CharField(max_length=32, null=True, unique=True)
+    facture_type = models.TextField(null=True)
+    facture_author = models.TextField(null=True)
+    facture_client = models.TextField(null=True)
+    facture_identifier = models.TextField(null=True)
+    facture_date = models.DateField(null=True)
+    facture_libelle = models.TextField(null=True)
+    facture_prix_ht = models.FloatField(null=True)
+    facture_prix_tax = models.FloatField(null=True)
+    facture_prix_ttc = models.FloatField(null=True)
+    facture_devise = models.TextField(null=True)
+    paiement_comment = models.TextField(null=True)
+    paiement_date = models.DateField(null=True)
+    paiement_proof = models.TextField(null=True)
+    banque = models.ForeignKey(Banque, on_delete=models.SET_NULL, null=True)
+    exercice_comptable = models.TextField(null=True)
+    def getFile(self):
+        f = File.objects.filter(md5=self.md5).first()
+        return f
+
+class File(models.Model):
+    filename = models.TextField(null=True)
+    fullpath = models.TextField(null=True, unique=True)
+    extention = models.TextField(null=True)
+    size = models.IntegerField(null=True)
+    ctime = models.IntegerField(null=True)
+    mtime = models.IntegerField(null=True)
+    md5 = models.CharField(max_length=32,null=True)
+    piece = models.ForeignKey(Piece, on_delete=models.SET_NULL, null=True)
+    def getDate(self, format='%d/%m/%Y'):
+        import time
+        return  time.strftime(format, time.gmtime(self.ctime))

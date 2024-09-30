@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+{% block title %}Relevés bancaires{% endblock %}
+{% block content %}
+<h1>Banque</h1>
+
+<table>
+{% for b in banques %}
+    <tr>
+      <td>
+        <div class="">{{ b.date|date:"d/m/Y" }}</div>
+        <div> &nbsp; </div>
+      </td>
+      <td>
+        <div class="fw-bold">{{ b.label }}</div>
+        <div> &nbsp; </div>
+      </td>
+      <td>
+        <div>
+        {% if not b.piece_id %}
+        <span class="badge text-bg-secondary rounded-pill">Pièce manquante</span>
+        {% else %}
+          <span class="badge text-bg-success rounded-pill">Pièce saisie</span>
+        {% endif %}
+        </div>
+        <div class='text-muted'>{{ b.banque_account }}</div>
+      </td>
+      <td>
+        <div class="text-end fw-bold">{{ b.amount|floatformat:2 }} €</div>
+        <div> &nbsp; </div>
+      </td>
+      <td>
+        <div><a href="./banque/{{ b.id }}">Associer à une pièce</a></div>
+        <div> &nbsp; </div>
+      </td>
+    </tr>
+{% endfor %}
+</table>
+{% endblock %}

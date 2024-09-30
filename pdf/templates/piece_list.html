@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+{% block title %}Liste des factures{% endblock %}
+{% block content %}
+<h1>Les factures</h1>
+<table>
+{% for p in pieces %}
+    <tr>
+      <td>
+        ²<div class="fw-bold">
+            {{ p.facture_author }}
+             ->
+            {{ p.facture_client }}
+        </div>
+        <div class="">{{ p.facture_date|date:"d/m/Y" }}</div>
+      </td>
+      <td>
+        <div> &nbsp; </div>
+        <div class="">{{ p.facture_libelle }}</div>
+      </td>
+      <td>
+        <div class="text-center">
+        {% if not p.banque %}
+        <span class="badge text-bg-secondary rounded-pill">Paiement manquant</span>
+        {% else %}
+          <span class="badge text-bg-success rounded-pill">Paiement ok</span>
+        {% endif %}
+        </div>
+        <div> &nbsp; </div>
+      </td>
+      <td>
+        <div class="text-end fw-bold">{{ p.facture_prix_ttc|floatformat:2 }}€</div>
+        <div class='text-end text-muted'>{{ p.facture_prix_ht|floatformat:2 }}€</div>
+      </td>
+      <td>
+        <div><a href="./piece/{{ p.md5 }}">Rapprocher</a></div>
+      </td>
+    </tr>
+{% endfor %}
+</table>
+{% endblock %}

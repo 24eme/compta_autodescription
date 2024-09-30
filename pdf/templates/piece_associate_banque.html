@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+{% block title %}Rapprocher une pièce de la banque{% endblock %}
+{% block content %}
+<h1>Lien entre pièce et banques</h1>
+<table>
+  <tr>
+    <td span="4"><h3>Piece</h3></td>
+  </tr>
+  <tr>
+    <td><div>{% if piece and piece.facture_date %}{{ piece.facture_date|date:"d/m/Y" }}{% else %}{{ file|date:"d/m/Y" }}{% endif %}</div></td>
+    <td>
+      <div>
+        {% if piece.facture_client %}
+        {{ piece.facture_client }}
+        {% if piece.facture_identifier %}
+        - Facture {{ piece.facture_identifier }}
+        {% endif %}
+        {% else %}
+        {{ file.filename }}
+        {% endif %}
+      </div>
+      <div>
+        {% if piece.facture_libelle %}
+        {{ piece.facture_libelle }}
+        {% endif %}
+      </div>
+    </td>
+    <td><div class="text-end">{{ piece.facture_prix_ttc }} €</div></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td span="4"><h3>Banque</h3></td>
+  </tr>
+  {% for bid, metabanque in banques.items %}
+  <tr>
+    <td><div>{{ metabanque.banque.date|date:"d/m/Y" }}</div></td>
+    <td><div>{{ metabanque.banque.label }}</div></td>
+    <td><div class="text-end">{{ metabanque.banque.amount }} €</div></td>
+    <td><a href="../pdf/{{ piece.md5 }}?banque_id={{ metabanque.banque.id }}">Editer la pièce</a></td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}
