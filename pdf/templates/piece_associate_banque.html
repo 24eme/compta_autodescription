@@ -25,7 +25,8 @@
         {% endif %}
       </div>
     </td>
-    <td><div class="text-end">{{ piece.facture_prix_ttc }} €</div></td>
+    <td><div class="text-end">{{ piece.facture_prix_ttc|floatformat:2 }} €</div></td>
+    <td></td>
     <td></td>
   </tr>
   <tr>
@@ -35,7 +36,7 @@
   <tr>
     <td><div>{{ metabanque.banque.date|date:"d/m/Y" }}</div></td>
     <td><div>{{ metabanque.banque.label }}</div></td>
-    <td><div class="text-end">{{ metabanque.banque.amount }} €</div></td>
+    <td><div class="text-end">{{ metabanque.banque.amount|floatformat:2 }} €</div></td>
     <td><a href="../pdf/{{ piece.md5 }}?banque_id={{ metabanque.banque.id }}">Editer la pièce</a></td>
   </tr>
   {% endfor %}

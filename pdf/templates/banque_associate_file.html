@@ -27,7 +27,7 @@
       </div>
       <div>{{ metafile.piece.facture_libelle }}</div>
     </td>
-    <td><div class="text-end">{{ metafile.piece.facture_prix_ttc }} €</div></td>
+    <td><div class="text-end">{{ metafile.piece.facture_prix_ttc|floatformat:2 }} €</div></td>
     {% elif metafile.file %}
     <td><div>{{ metafile.file|date:"d/m/Y" }}</div></td>
     <td>
