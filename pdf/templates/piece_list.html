@@ -4,7 +4,7 @@
 <h1>Les factures</h1>
 <table>
 {% for p in pieces %}
-    <tr>
+    <tr class="{% if p.banque %}bg-success{% endif %}">
       <td>
         ²<div class="fw-bold">
             {{ p.facture_author }}

@@ -5,7 +5,7 @@
 
 <table>
 {% for b in banques %}
-    <tr>
+    <tr class="{% if b.piece_id %}bg-success{% endif %}">
       <td>
         <div class="">{{ b.date|date:"d/m/Y" }}</div>
         <div> &nbsp; </div>

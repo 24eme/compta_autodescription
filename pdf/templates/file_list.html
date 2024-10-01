@@ -4,7 +4,7 @@
 <h1>Les fichiers</h1>
 <table>
 {% for f in files %}
-    <tr>
+    <tr class="{% if f.piece_id and f.piece.paiement_proof %}bg-success{% endif %}">
       <td>
         <div class="">{{ f.date }}</div>
       </td>
