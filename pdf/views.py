@@ -43,6 +43,7 @@ def pdf_edit(request, md5):
         "file": files[0],
         "pdf_edit_full_url": os.environ.get('COMPTA_PDF_URL')+files[0].fullpath.replace(os.environ.get('COMPTA_PDF_BASE_PATH'), ''),
         "banque": banque,
+        "back_banque": request.GET.get('back') == 'banque'
     }
     return render(request, "pdf_edit.html", context)
 

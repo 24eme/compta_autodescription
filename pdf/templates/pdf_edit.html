@@ -4,7 +4,11 @@
 <h1>Edition de la pièce</h1>
 {% if banque %}
 <div>
+  {% if back_banque %}
+  <a href="../banque"><< Retour aux relevé</a>
+  {% else %}
   <a href="../pieces"><< Retour aux pieces</a>
+  {% endif %}
 </div>
 <div>
   <p>{{ banque.date|date:"Y-m-d" }}</p>
@@ -26,7 +30,11 @@
   <p>{{ banque.raw }}</p>
 </div>
 <div>
+  {% if back_banque %}
+  <a href="../banque"><< Retour aux relevé</a>
+  {% else %}
   <a href="../pieces"><< Retour aux pieces</a>
+  {% endif %}
 </div>
 {% else %}
 <div>
