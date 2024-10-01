@@ -5,18 +5,22 @@ from django.template import loader
 from pdf.models import Banque
 from pdf.models import Piece
 from pdf.models import File
+import Indexer
+
 import os
 
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
 
 def banque_list(request):
+    Indexer.Indexer.update()
     context = {
         "banques": Banque.objects.order_by('ctime')
     }
     return render(request, "banque_list.html", context)
 
 def piece_list(request):
+    Indexer.Indexer.update()
     context = {
         "pieces": Piece.objects.order_by('-facture_date')
     }
@@ -24,6 +28,7 @@ def piece_list(request):
 
 
 def file_list(request):
+    Indexer.Indexer.update()
     context = {
         "files": File.objects.order_by('-ctime')
     }
