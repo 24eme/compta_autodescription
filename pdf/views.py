@@ -115,7 +115,10 @@ def piece_associate_banque(request, md5):
 def banque_associate_file(request, banque_id):
     banque = Banque.objects.get(pk=banque_id)
     pieces = {}
-    for piece in Piece.objects.filter(banque=None):
+    piece_objects = Piece.objects.filter(banque=None)
+    if request.GET.get('all'):
+        piece_objects = Piece.objects.all()
+    for piece in piece_objects:
         distance = 0
         nb = 0
         distance += compare_strings(piece.facture_author, banque.raw)
@@ -135,8 +138,9 @@ def banque_associate_file(request, banque_id):
             if thediff <= 1:
                 distance += thediff
                 nb += 1
-        distance += 2 * abs(abs(piece.facture_prix_ttc) - abs(banque.amount)) / abs(piece.facture_prix_ttc)
-        nb += 2
+        if piece.facture_prix_ttc:
+            distance += 2 * abs(abs(piece.facture_prix_ttc) - abs(banque.amount)) / abs(piece.facture_prix_ttc)
+            nb += 2
         file = piece.getFile()
         if file:
             distance += compare_strings(file.fullpath, banque.raw)
