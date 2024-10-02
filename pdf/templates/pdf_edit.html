@@ -12,19 +12,42 @@
 </div>
 <div class="d-flex">
   <p class="px-2">
+    <br/>
     {% if banque.piece_id and banque_id == file.piece_id %}
     Lié à l'écriture bancaire :
     {% else %}
     Rappel info bancaire :
     {% endif %}
   </p>
-  <p class="px-5">{{ banque.date|date:"Y-m-d" }}</p>
-  <p class="px-5">{{ banque.raw }}</p>
-  <p class="px-5">{{ banque.amount|floatformat:2 }} €</p>
+  <p class="px-5">
+    <span class="text-muted">paiement:date</span>
+    <br/>
+    {{ banque.date|date:"Y-m-d" }}
+  </p>
+  <p class="px-5">
+    <span class="text-muted">paiement:proof</span>
+    <br/>
+    {{ banque.raw }}
+  </p>
+  <p class="px-5">
+    <span class="text-muted">facture:TTC</span>
+    <br/>
+    {{ banque.amount|floatformat:2 }} €
+  </p>
 </div>
 {% else %}
 <div>
   <a href="../files"><< Retour aux fichiers</a>
+</div>
+<div class="d-flex">
+  <p>Champs attendus pour les pièces : </p>
+  <p class="px-2 text-muted">facture:identifier</p>
+  <p class="px-2 text-muted">facture:author</p>
+  <p class="px-2 text-muted">facture:client</p>
+  <p class="px-2 text-muted">facture:date</p>
+  <p class="px-2 text-muted">facture:TTC</p>
+  <p class="px-2 text-muted">facture:HT</p>
+  <p class="px-2 text-muted">facture:libelle</p>
 </div>
 {% endif %}
 </div>
@@ -35,15 +58,28 @@
 {% if banque %}
 <div class="d-flex">
   <p class="px-2">
+    <br/>
     {% if banque.piece_id and banque_id == file.piece_id %}
     Lié à l'écriture bancaire :
     {% else %}
     Rappel info bancaire :
     {% endif %}
   </p>
-  <p class="px-5">{{ banque.date|date:"Y-m-d" }}</p>
-  <p class="px-5">{{ banque.raw }}</p>
-  <p class="px-5">{{ banque.amount|floatformat:2 }} €</p>
+  <p class="px-5">
+    <span class="text-muted">paiement:date</span>
+    <br/>
+    {{ banque.date|date:"Y-m-d" }}
+  </p>
+  <p class="px-5">
+    <span class="text-muted">paiement:proof</span>
+    <br/>
+    {{ banque.raw }}
+  </p>
+  <p class="px-5">
+    <span class="text-muted">facture:TTC</span>
+    <br/>
+    {{ banque.amount|floatformat:2 }} €
+  </p>
 </div>
 <div>
   {% if back_banque %}
@@ -55,6 +91,16 @@
 {% else %}
 <div>
   <a href="../files"><< Retour aux fichiers</a>
+</div>
+<div class="d-flex">
+  <p>Champs attendus pour les pièces : </p>
+  <p class="px-2 text-muted">facture:identifier</p>
+  <p class="px-2 text-muted">facture:author</p>
+  <p class="px-2 text-muted">facture:client</p>
+  <p class="px-2 text-muted">facture:date</p>
+  <p class="px-2 text-muted">facture:TTC</p>
+  <p class="px-2 text-muted">facture:HT</p>
+  <p class="px-2 text-muted">facture:libelle</p>
 </div>
 {% endif %}
 {% endblock %}
