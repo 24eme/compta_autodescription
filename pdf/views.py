@@ -44,7 +44,7 @@ def pdf_edit(request, md5):
         banque = Banque.objects.get(pk=file.piece.banque_id)
     context = {
         "file": files,
-        "pdf_edit_full_url": os.environ.get('COMPTA_PDF_URL')+file.fullpath.replace(os.environ.get('COMPTA_PDF_BASE_PATH'), ''),
+        "pdf_edit_full_url": os.environ.get('COMPTA_PDF_URL')+files[0].fullpath.replace(os.environ.get('COMPTA_PDF_BASE_PATH'), '').replace('+','%2b'),
         "banque": banque,
         "back_banque": request.GET.get('back') == 'banque'
     }
