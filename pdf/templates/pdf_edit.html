@@ -10,9 +10,17 @@
   <a href="../pieces"><< Retour aux pieces</a>
   {% endif %}
 </div>
-<div>
-  <p>{{ banque.date|date:"Y-m-d" }}</p>
-  <p>{{ banque.raw }}</p>
+<div class="d-flex">
+  <p class="px-2">
+    {% if banque.piece_id and banque_id == file.piece_id %}
+    Lié à l'écriture bancaire :
+    {% else %}
+    Rappel info bancaire :
+    {% endif %}
+  </p>
+  <p class="px-5">{{ banque.date|date:"Y-m-d" }}</p>
+  <p class="px-5">{{ banque.raw }}</p>
+  <p class="px-5">{{ banque.amount|floatformat:2 }} €</p>
 </div>
 {% else %}
 <div>
@@ -25,9 +33,17 @@
   </iframe>
 </div>
 {% if banque %}
-<div>
-  <p>{{ banque.date|date:"Y-m-d" }}</p>
-  <p>{{ banque.raw }}</p>
+<div class="d-flex">
+  <p class="px-2">
+    {% if banque.piece_id and banque_id == file.piece_id %}
+    Lié à l'écriture bancaire :
+    {% else %}
+    Rappel info bancaire :
+    {% endif %}
+  </p>
+  <p class="px-5">{{ banque.date|date:"Y-m-d" }}</p>
+  <p class="px-5">{{ banque.raw }}</p>
+  <p class="px-5">{{ banque.amount|floatformat:2 }} €</p>
 </div>
 <div>
   {% if back_banque %}

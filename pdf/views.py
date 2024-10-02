@@ -36,12 +36,15 @@ def file_list(request):
 
 def pdf_edit(request, md5):
     files = File.objects.filter(md5=md5).order_by('-mtime')
+    file = files[0]
     banque = None
     if request.GET.get('banque_id'):
         banque = Banque.objects.get(pk=request.GET.get('banque_id'))
+    elif file and file.piece and file.piece.banque_id:
+        banque = Banque.objects.get(pk=file.piece.banque_id)
     context = {
-        "file": files[0],
-        "pdf_edit_full_url": os.environ.get('COMPTA_PDF_URL')+files[0].fullpath.replace(os.environ.get('COMPTA_PDF_BASE_PATH'), ''),
+        "file": files,
+        "pdf_edit_full_url": os.environ.get('COMPTA_PDF_URL')+file.fullpath.replace(os.environ.get('COMPTA_PDF_BASE_PATH'), ''),
         "banque": banque,
         "back_banque": request.GET.get('back') == 'banque'
     }
