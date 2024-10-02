@@ -14,6 +14,12 @@ class Banque(models.Model):
     mtime = models.IntegerField(null=True)
     class Meta:
         unique_together = ('date', 'raw')
+    def getPieceMd5(self):
+        p = Piece.objects.get(pk=self.piece_id)
+        if not p:
+            return None
+        return p.md5
+
 
 class Piece(models.Model):
     filename = models.TextField(null=True)

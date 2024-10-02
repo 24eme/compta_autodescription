@@ -32,7 +32,14 @@
         <div class='text-end text-muted'>{{ p.facture_prix_ht|floatformat:2 }}€</div>
       </td>
       <td>
-        <div><a href="./piece/{{ p.md5 }}">Rapprocher</a></div>
+        <div>
+          {% if not p.banque %}
+          <a href="./piece/{{ p.md5 }}">Rapprocher</a>
+          {% else %}
+          <a href="./pdf/{{ p.md5 }}">Voir la pièce</a>
+          {% endif %}
+      </div>
+
       </td>
     </tr>
 {% endfor %}

@@ -29,7 +29,13 @@
         <div> &nbsp; </div>
       </td>
       <td>
-        <div><a href="./banque/{{ b.id }}">Associer à une pièce</a></div>
+        <div>
+          {% if b.piece_id %}
+          <a href="./pdf/{{ b.getPieceMd5 }}">Voir la pièce</a>
+          {% else %}
+          <a href="./banque/{{ b.id }}">Associer à une pièce</a>
+          {% endif %}
+        </div>
         <div> &nbsp; </div>
       </td>
     </tr>
