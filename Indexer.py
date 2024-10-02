@@ -70,6 +70,7 @@ class Indexer(object):
         sql_update = sql_update + " filename = \"%s\", extention = \"pdf\" " % os.path.basename(file)
         sql_update = sql_update + ', md5 = "%s"' % meta['md5']
         sql_update = sql_update + ', mtime = %d' % meta['mtime']
+        sql_update = sql_update + ", fullpath = \"%s\" " % file
         need_update = False
         if meta.get('facture:type'):
             sql_update = sql_update + ", facture_type = \"%s\"" % meta['facture:type']
