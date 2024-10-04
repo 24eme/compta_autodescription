@@ -2,11 +2,19 @@
 {% block title %}Liste des factures{% endblock %}
 {% block content %}
 <h1>Les factures</h1>
-<table>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th class="col-1">Client / Date</th>
+      <th class="col-9">Libellé</th>
+      <th class="col-1">Statut</th>
+      <th class="col-1"></th>
+    </tr>
+  </thead>
 {% for p in pieces %}
-    <tr class="{% if p.banque %}bg-success{% endif %}">
+    <tr class="{% if p.banque %}table-success{% endif %}">
       <td>
-        ²<div class="fw-bold">
+        <div class="fw-bold">
             {{ p.facture_author }}
              ->
             {{ p.facture_client }}
@@ -16,6 +24,11 @@
       <td>
         <div> Facture n° {{ p.facture_identifier }} </div>
         <div class="">{{ p.facture_libelle }}</div>
+        <div class="">{{ p.filename }}</div>
+      </td>
+      <td>
+        <div class="text-end fw-bold">{{ p.facture_prix_ttc|floatformat:2 }}€</div>
+        <div class='text-end text-muted'>{{ p.facture_prix_ht|floatformat:2 }}€</div>
       </td>
       <td>
         <div class="text-center">
@@ -26,10 +39,6 @@
         {% endif %}
         </div>
         <div> &nbsp; </div>
-      </td>
-      <td>
-        <div class="text-end fw-bold">{{ p.facture_prix_ttc|floatformat:2 }}€</div>
-        <div class='text-end text-muted'>{{ p.facture_prix_ht|floatformat:2 }}€</div>
       </td>
       <td>
         <div>

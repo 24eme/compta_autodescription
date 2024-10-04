@@ -3,15 +3,28 @@
 {% block content %}
 <h1>Banque</h1>
 
-<table>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th class="col-1">Date de l'opération</th>
+      <th class="col-8">Libellé</th>
+      <th class="col-1">Montant</th>
+      <th class="col-1">Statut</th>
+      <th class="col-1"></th>
+    </tr>
+  </thead>
 {% for b in banques %}
-    <tr class="{% if b.piece_id %}bg-success{% endif %}">
+    <tr class="{% if b.piece_id %}table-success{% endif %}">
       <td>
         <div class="">{{ b.date|date:"d/m/Y" }}</div>
         <div> &nbsp; </div>
       </td>
       <td>
         <div class="fw-bold">{{ b.label }}</div>
+        <div class='text-muted'>{{ b.banque_account }}</div>
+      </td>
+      <td>
+        <div class="text-end fw-bold">{{ b.amount|floatformat:2 }} €</div>
         <div> &nbsp; </div>
       </td>
       <td>
@@ -22,10 +35,6 @@
           <span class="badge text-bg-success rounded-pill">Pièce saisie</span>
         {% endif %}
         </div>
-        <div class='text-muted'>{{ b.banque_account }}</div>
-      </td>
-      <td>
-        <div class="text-end fw-bold">{{ b.amount|floatformat:2 }} €</div>
         <div> &nbsp; </div>
       </td>
       <td>

@@ -2,9 +2,17 @@
 {% block title %}Liste des factures{% endblock %}
 {% block content %}
 <h1>Les fichiers</h1>
-<table>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th class="col-1">Date</th>
+      <th class="col-9">Nom du fichier</th>
+      <th class="col-1">Statut</th>
+      <th class="col-1"></th>
+    </tr>
+  </thead>
 {% for f in files %}
-    <tr class="{% if f.piece_id and f.piece.paiement_proof %}bg-success{% endif %}">
+    <tr class="{% if f.piece_id and f.piece.paiement_proof %}table-success{% endif %}">
       <td>
         <div class="">{{ f.date }}</div>
       </td>
