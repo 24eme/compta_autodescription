@@ -113,7 +113,7 @@ def piece_associate_banque(request, md5):
 
     banques = dict(sorted(banques.items(), key=lambda x: x[1]['distance']))
 
-    return render(request, "piece_associate_banque.html", {"banques": banques, "piece": piece, "file": file, 'file_date': file.getDate()})
+    return render(request, "piece_associate_banque.html", {"banques": banques, "piece": piece, "file": file})
 
 def banque_associate_file(request, banque_id):
     banque = Banque.objects.get(pk=banque_id)
