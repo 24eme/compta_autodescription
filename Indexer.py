@@ -158,10 +158,12 @@ class Indexer(object):
                     continue
                 csv_row[1] = re.sub(r'  +', ' ', csv_row[1])
                 csv_row[7] = re.sub(r'  +', ' ', csv_row[7])
-                res = conn.execute("SELECT id FROM pdf_banque WHERE date = \"%s\" AND raw = \"%s\";" % (csv_row[0], csv_row[1]))
+                sql = "SELECT id FROM pdf_banque WHERE date = \"%s\" AND raw = \"%s\";" % (csv_row[0], csv_row[1])
+                res = conn.execute(sql)
                 row = res.fetchone()
                 if not row or not row[0]:
-                    conn.execute("INSERT INTO pdf_banque (date, raw, ctime) VALUES (\"%s\", \"%s\" , \"%s\")" % (csv_row[0], csv_row[1], imported_at) )
+                    sql = "INSERT INTO pdf_banque (date, raw, ctime) VALUES (\"%s\", \"%s\" , \"%s\")" % (csv_row[0], csv_row[1], imported_at)
+                    conn.execute(sql)
                 sql = "UPDATE pdf_banque SET "
                 sql = sql + 'amount = %s, ' % csv_row[2]
                 sql = sql + 'type = "%s", ' % csv_row[3]
