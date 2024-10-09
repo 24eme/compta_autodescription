@@ -57,6 +57,6 @@ class File(models.Model):
     mtime = models.IntegerField(null=True)
     md5 = models.CharField(max_length=32,null=True)
     piece = models.ForeignKey(Piece, on_delete=models.SET_NULL, null=True)
-    def getDate(self, format='%d/%m/%Y'):
+    def date(self, format='%d/%m/%Y'):
         import time
         return  time.strftime(format, time.gmtime(self.ctime))
