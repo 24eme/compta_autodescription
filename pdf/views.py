@@ -160,6 +160,8 @@ def banque_associate_file(request, banque_id):
         pieces[piece.md5] = {"distance": distance/nb, "piece": piece}
 
     for file in File.objects.filter(piece_id=None):
+        distance = 0
+        nb = 0
         distance += compare_strings(file.fullpath, banque.raw)
         nb += 1
         distance += compare_strings(file.filename, banque.raw)
@@ -168,8 +170,8 @@ def banque_associate_file(request, banque_id):
         distance += 1
         nb += 1
         thediff = (int(banque.date.strftime('%s')) - file.ctime) / (60*60*24*30)
-        if thediff <= 1:
-            distance += thediff
+        if thediff <= 1 and thediff >= 0.2:
+            distance += abs(thediff)
             nb += 1
         pieces[file.md5] = {"distance": distance/nb, "file": file}
 
