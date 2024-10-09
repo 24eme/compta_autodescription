@@ -21,7 +21,7 @@
   </p>
   <p class="px-5"><span class="text-muted">paiement:date</span><br/>{{ banque.date|date:"Y-m-d" }}</p>
   <p class="px-5"><span class="text-muted">paiement:proof</span><br/>{{ banque.raw }}</p>
-  <p class="px-5"><span class="text-muted">facture:TTC</span><br/>{{ banque.amount|floatformat:2 }} €</p>
+  <p class="px-5"><span class="text-muted">facture:TTC</span><br/>{{ banque.amount|floatformat:2 }}</p>
 </div>
 {% else %}
 <div>
@@ -55,7 +55,7 @@
   </p>
   <p class="px-5"><span class="text-muted">paiement:date</span><br/>{{ banque.date|date:"Y-m-d" }}</p>
   <p class="px-5"><span class="text-muted">paiement:proof</span><br/>{{ banque.raw }}</p>
-  <p class="px-5"><span class="text-muted">facture:TTC</span><br/>{{ banque.amount|floatformat:2 }} €</p>
+  <p class="px-5"><span class="text-muted">facture:TTC</span><br/>{{ banque.amount|floatformat:2 }}</p>
 </div>
 <div>
   {% if back_banque %}
