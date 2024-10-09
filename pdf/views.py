@@ -13,7 +13,7 @@ def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
 
 def banque_list(request):
-    Indexer.Indexer.update()
+    Indexer.Indexer.update(request.GET.get('force'))
     context = {
         "banques": Banque.objects.order_by('ctime')
     }

@@ -132,7 +132,7 @@ class Indexer(object):
         return True
 
     @staticmethod
-    def index_banque(csv_url, conn):
+    def index_banque(csv_url, force, conn):
         import csv
         import requests
         from io import StringIO
@@ -147,8 +147,8 @@ class Indexer(object):
         if fetch:
             last = fetch[0]
 
-        #if last and (updated_at - last) < 15 * 60:
-        #    return False
+        if not force and last and (updated_at - last) < 15 * 60:
+            return False
 
         with requests.get(csv_url, stream=True) as r:
             csv_raw = StringIO(r.text)
@@ -221,7 +221,7 @@ class Indexer(object):
 
 
     @staticmethod
-    def update_path(path):
+    def update_path(path, force):
         with sqlite3.connect('db/database.sqlite') as conn:
             conn.row_factory = sqlite3.Row
             need_consolidate = False
@@ -239,19 +239,19 @@ class Indexer(object):
             for file in glob.glob(path+'/**/*pdf', recursive=True):
                 need_consolidate = Indexer.index_pdf(file, last, conn) or need_consolidate
 
-            need_consolidate = Indexer.index_banque('https://raw.githubusercontent.com/24eme/banque/master/data/history.csv', conn) or need_consolidate
+            need_consolidate = Indexer.index_banque('https://raw.githubusercontent.com/24eme/banque/master/data/history.csv', force, conn) or need_consolidate
 
             if need_consolidate:
                 Indexer.consolidate(conn)
                 conn.commit()
 
     @staticmethod
-    def update():
+    def update(force = False):
         for subdir in os.environ.get('COMPTA_PDF_COMPTA_SUBDIR').split('|'):
-            Indexer.update_path(os.environ.get('COMPTA_PDF_BASE_PATH') + '/' + subdir)
+            Indexer.update_path(os.environ.get('COMPTA_PDF_BASE_PATH') + '/' + subdir, force)
 
 def main():
-    Indexer.update_path(sys.argv[1])
+    Indexer.update_path(sys.argv[1], True)
 
 if __name__ == "__main__":
     main()
