@@ -15,7 +15,7 @@ def index(request):
 def banque_list(request):
     Indexer.Indexer.update(request.GET.get('force'))
     context = {
-        "banques": Banque.objects.order_by('-ctime')
+        "banques": Banque.objects.order_by('-date')
     }
     return render(request, "banque_list.html", context)
 
