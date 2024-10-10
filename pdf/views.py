@@ -92,8 +92,8 @@ def piece_associate_banque(request, md5):
         nb += 1
         thediff = 0
         if piece.facture_date:
-            thediff = (int(banque.date.strftime('%s')) - int(piece.facture_date.strftime('%s'))) / (60*60*24*30)
-        if piece.facture_date and thediff <= 1 and thediff <= -0.5:
+            thediff = (int(banque.date.strftime('%s')) - int(piece.facture_date.strftime('%s'))) / (60*60*24*30*6)
+        if piece.facture_date and thediff <= 1 and thediff <= -0.03:
             distance += abs(thediff)
             nb += 1
         else:
@@ -111,7 +111,7 @@ def piece_associate_banque(request, md5):
                 else:
                     distance += 2
                     nb += 2
-        if request.GET.get('all') or thediff >= -1 :
+        if request.GET.get('all') or thediff >= -0.03 :
             banques[banque.id] = {"distance": distance/nb, "banque": banque}
 
     banques = dict(sorted(banques.items(), key=lambda x: x[1]['distance']))
