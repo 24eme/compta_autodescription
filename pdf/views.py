@@ -139,9 +139,10 @@ def banque_associate_file(request, banque_id):
         nb += 1
         distance += compare_strings(piece.facture_identifier, banque.raw)
         nb += 1
+        print([piece.facture_libelle, piece.facture_date])
         if piece.facture_date:
-            thediff = (int(banque.date.strftime('%s')) - int(piece.facture_date.strftime('%s'))) / (60*60*24*30)
-            if thediff <= 1 and thediff >= -0.5:
+            thediff = (int(banque.date.strftime('%s')) - int(piece.facture_date.strftime('%s'))) / (60*60*24*30*6)
+            if thediff <= 1 and thediff >= -0.03:
                 distance += abs(thediff)
                 nb += 1
         if piece.facture_prix_ttc:
@@ -153,8 +154,8 @@ def banque_associate_file(request, banque_id):
             nb += 1
             distance += compare_strings(file.filename, banque.raw)
             nb += 1
-            thediff = (file.ctime - int(banque.date.strftime('%s'))) / (60*60*24*30)
-            if thediff <= 1 and thediff >= -0.5:
+            thediff = (file.ctime - int(banque.date.strftime('%s'))) / (60*60*24*30*6)
+            if thediff <= 1 and thediff >= -0.03:
                 distance += abs(thediff)
                 nb += 1
         pieces[piece.md5] = {"distance": distance/nb, "piece": piece}
@@ -169,8 +170,8 @@ def banque_associate_file(request, banque_id):
         #Pas de montant
         distance += 1
         nb += 1
-        thediff = (int(banque.date.strftime('%s')) - file.ctime) / (60*60*24*30)
-        if thediff <= 1 and thediff >= 0.2:
+        thediff = (int(banque.date.strftime('%s')) - file.ctime) / (60*60*24*30*6)
+        if thediff <= 1 and thediff >= 0.03:
             distance += abs(thediff)
             nb += 1
         pieces[file.md5] = {"distance": distance/nb, "file": file}
