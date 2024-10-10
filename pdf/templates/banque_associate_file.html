@@ -2,18 +2,18 @@
 {% block title %}Rapprocher une pièce de la banque{% endblock %}
 {% block content %}
 <h1>Lien entre pièce et banques</h1>
-<table>
+<table class="table table-striped">
   <tr>
-    <td span="4"><h3>Banque</h3></td>
+    <th colspan="4"><h3>Banque</h3></th>
   </tr>
   <tr>
-    <td><div>{{ banque.date|date:"d/m/Y" }}</div></td>
-    <td><div>{{ banque.label }}</div></td>
-    <td><div class="text-end">{{ banque.amount }} €</div></td>
-    <td></td>
+    <th><div>{{ banque.date|date:"d/m/Y" }}</div></th>
+    <th><div>{{ banque.label }}</div></th>
+    <th><div class="text-end">{{ banque.amount }} €</div></th>
+    <th></th>
   </tr>
   <tr>
-    <td span="4"><h3>Pièces</h3></td>
+    <th colspan="4"><h3>Pièces</h3></th>
   </tr>
   {% for md5, metafile in pieces.items %}
   <tr>

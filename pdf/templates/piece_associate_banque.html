@@ -2,13 +2,13 @@
 {% block title %}Rapprocher une pièce de la banque{% endblock %}
 {% block content %}
 <h1>Lien entre pièce et banques</h1>
-<table>
+<table class="table table-striped">
   <tr>
-    <td span="4"><h3>Piece</h3></td>
+    <th colspan="4"><h3>Piece</h3></th>
   </tr>
   <tr>
-    <td><div>{% if piece and piece.facture_date %}{{ piece.facture_date|date:"d/m/Y" }}{% else %}{{ file.date }}{% endif %}</div></td>
-    <td>
+    <th><div>{% if piece and piece.facture_date %}{{ piece.facture_date|date:"d/m/Y" }}{% else %}{{ file.date }}{% endif %}</div></th>
+    <th>
       <div>
         {% if piece.facture_client %}
         {{ piece.facture_client }}
@@ -24,13 +24,13 @@
         {{ piece.facture_libelle }}
         {% endif %}
       </div>
-    </td>
-    <td><div class="text-end">{{ piece.facture_prix_ttc|floatformat:2 }} €</div></td>
-    <td></td>
-    <td></td>
+    </th>
+    <th><div class="text-end">{{ piece.facture_prix_ttc|floatformat:2 }} €</div></th>
+    <th></th>
+    <th></th>
   </tr>
   <tr>
-    <td span="4"><h3>Banque</h3></td>
+    <th colspan="4"><h3>Banque</h3></th>
   </tr>
   {% for bid, metabanque in banques.items %}
   <tr>
