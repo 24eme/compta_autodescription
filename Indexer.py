@@ -218,20 +218,40 @@ class Indexer(object):
             banqueid = None
             if not row['paiement_proof']:
                 continue
-            paiement_proof = re.sub(r'  *', ' ', row['paiement_proof'])
-            if row['paiement_date']:
-                banqueid = proof2banqueid.get(paiement_proof + 'ø' + row['paiement_date'])
-            if not banqueid:
-                ids = []
-                for pkey in proof2banqueid:
-                    (label, date) = pkey.split('ø')
-                    if label.find(paiement_proof) != -1 or paiement_proof.find(label) != -1:
-                        ids.append(proof2banqueid[pkey])
-                if len(ids) == 1:
-                    banqueid = ids[0]
-            if banqueid:
-                conn.execute("UPDATE pdf_piece SET banque_id = %d WHERE id = %d" % (banqueid,  row['id']) )
-                conn.execute("UPDATE pdf_banque SET piece_id = %d WHERE id = %d" % (row['id'], banqueid) )
+            if not row['paiement_date']:
+                continue
+            proofs = row['paiement_proof'].split('|')
+            dates = row['paiement_date'].split('|')
+            if len(proofs) > 1 and len(proofs) != len(dates):
+                continue
+            for i in range(0,len(dates)):
+                paiement_date = dates[i]
+                try:
+                    paiement_proof = proofs[i]
+                except:
+                    paiement_proof = proofs[0]
+                paiement_proof = re.sub(r'  *', ' ', paiement_proof)
+                paiement_proof = re.sub(r'^  *', '', paiement_proof)
+                paiement_proof = re.sub(r'  *$', '', paiement_proof)
+                if not paiement_proof:
+                    continue
+                if paiement_date:
+                    banqueid = proof2banqueid.get(paiement_proof + 'ø' + paiement_date)
+                if not banqueid:
+                    ids = []
+                    for pkey in proof2banqueid:
+                        (label, date) = pkey.split('ø')
+                        label = re.sub(r'  *', ' ', label)
+                        label = re.sub(r'^  *', '', label)
+                        label = re.sub(r'  *$', '', label)
+                        if label.find(paiement_proof) != -1 or paiement_proof.find(label) != -1:
+                            if date == paiement_date:
+                                ids.append(proof2banqueid[pkey])
+                    if len(ids) == 1:
+                        banqueid = ids[0]
+                if banqueid:
+                    conn.execute("UPDATE pdf_piece SET banque_id = %d WHERE id = %d" % (banqueid,  row['id']) )
+                    conn.execute("UPDATE pdf_banque SET piece_id = %d WHERE id = %d" % (row['id'], banqueid) )
         conn.commit()
 
         res = conn.execute("SELECT id, md5 FROM pdf_file WHERE piece_id IS NULL")
