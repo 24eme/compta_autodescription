@@ -1,8 +1,10 @@
 {% extends "layout.html" %}
 {% block title %}Relevés bancaires{% endblock %}
 {% block content %}
-<h1>Banque</h1>
-
+<div class="row">
+<h1 class="col-9">Banque</h1>
+<div class="col-3 p-4 text-end">Last update : {{ last_updated_tupple.getModified }} <a href="?force=true"><i class="bi bi-arrow-clockwise"></i></a></div>
+</div>
 <table class="table table-striped">
   <thead>
     <tr>

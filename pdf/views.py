@@ -14,23 +14,30 @@ def index(request):
 
 def banque_list(request):
     Indexer.Indexer.update(request.GET.get('force'))
+
+    last_update = Banque.objects.order_by('-mtime')[0]
     context = {
-        "banques": Banque.objects.order_by('-date')
+        "banques": Banque.objects.order_by('-date'),
+        "last_updated_tupple": last_update
     }
     return render(request, "banque_list.html", context)
 
 def piece_list(request):
     Indexer.Indexer.update()
+    last_update = File.objects.order_by('-mtime')[0]
     context = {
-        "pieces": Piece.objects.order_by('-facture_date')
+        "pieces": Piece.objects.order_by('-facture_date'),
+        "last_updated_tupple": last_update
     }
     return render(request, "piece_list.html", context)
 
 
 def file_list(request):
     Indexer.Indexer.update()
+    last_update = File.objects.order_by('-mtime')[0]
     context = {
-        "files": File.objects.order_by('-ctime')
+        "files": File.objects.order_by('-ctime'),
+        "last_updated_tupple": last_update
     }
     return render(request, "file_list.html", context)
 
@@ -157,7 +164,7 @@ def banque_associate_file(request, banque_id):
             if thediff <= 1 and thediff >= -0.03:
                 distance += abs(thediff)
                 nb += 1
-        pieces[piece.md5] = {"distance": distance/nb, "piece": piece}
+        pieces[piece.md5] = {"distance": distance/nb, "piece": piece, "file": piece.getFile()}
 
     for file in File.objects.filter(piece_id=None):
         distance = 0

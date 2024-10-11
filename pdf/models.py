@@ -19,6 +19,9 @@ class Banque(models.Model):
         if not p:
             return None
         return p.md5
+    def getModified(self, format='%d/%m/%Y %H:%M:%S'):
+        import time
+        return  time.strftime(format, time.gmtime(self.mtime))
 
 
 class Piece(models.Model):
@@ -60,3 +63,6 @@ class File(models.Model):
     def date(self, format='%d/%m/%Y'):
         import time
         return  time.strftime(format, time.gmtime(self.ctime))
+    def getModified(self, format='%d/%m/%Y %H:%M:%S'):
+        import time
+        return  time.strftime(format, time.gmtime(self.mtime))
