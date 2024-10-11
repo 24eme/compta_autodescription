@@ -26,11 +26,11 @@
       </div>
     </th>
     <th><div class="text-end">{{ piece.facture_prix_ttc|floatformat:2 }} €</div></th>
-    <th></th>
-    <th></th>
+    <td><a href="../pdf/{{ piece.md5 }}">Voir la pièce</a></td>
   </tr>
   <tr>
-    <th colspan="4"><h3>Banque</h3></th>
+    <th><h3>Banque<h3></th>
+    <td class="align-middle" colspan="3">( <a href="?all=true">Voir tout</a> )</td>
   </tr>
   {% for bid, metabanque in banques.items %}
   <tr>
