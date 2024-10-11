@@ -19,18 +19,30 @@
   {% for md5, metafile in pieces.items %}
   <tr>
     {% if metafile.piece %}
-    <td><div>{{ metafile.piece.facture_date|date:"d/m/Y" }}</div></td>
+    <td><div>
+      {% if metafile.piece.facture_date %}
+      {{ metafile.piece.facture_date|date:"d/m/Y" }}
+      {% else %}
+      {{ metafile.file.date }}
+      {% endif %}
+    </div></td>
     <td>
       <div>{{ metafile.piece.facture_client }}
         {% if metafile.piece.facture_identifier %}
         - Facture {{ metafile.piece.facture_identifier }}
         {% endif %}
       </div>
-      <div>{{ metafile.piece.facture_libelle }}</div>
+      <div>
+        {% if metafile.piece.facture_libelle %}
+        {{ metafile.piece.facture_libelle }}
+        {% else %}
+        {{ metafile.piece.filename }}
+        {% endif %}
+      </div>
     </td>
     <td><div class="text-end">{{ metafile.piece.facture_prix_ttc|floatformat:2 }} €</div></td>
     {% elif metafile.file %}
-    <td><div>{{ metafile.file|date:"d/m/Y" }}</div></td>
+    <td><div>{{ metafile.file.date }}</div></td>
     <td>
       <div>
         {{ metafile.file.filename }}
