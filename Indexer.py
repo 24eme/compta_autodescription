@@ -133,6 +133,11 @@ class Indexer(object):
 
         conn.execute(sql_update)
         conn.commit()
+
+
+        if os.environ.get('VERBOSE', None):
+            print("Index: %s" % file)
+
         return True
 
     @staticmethod
@@ -183,12 +188,22 @@ class Indexer(object):
             res = conn.execute("UPDATE pdf_banque SET mtime = %d WHERE mtime = %d LIMIT 1" % (updated_at, last));
 
         conn.commit()
+
+
+        if os.environ.get('VERBOSE', None):
+            print("Indexed: Banque")
+
         return True
 
     @staticmethod
     def consolidate(conn):
         res = conn.execute("SELECT id, date, raw, label FROM pdf_banque");
         proof2banqueid = {}
+
+
+        if os.environ.get('VERBOSE', None):
+            print("Index: consolidating")
+
 
         for row in res:
             if row['raw']:
@@ -238,12 +253,24 @@ class Indexer(object):
                 if row:
                     last = row[0]
             except sqlite3.OperationalError:
+
+                if os.environ.get('VERBOSE', None):
+                    print("Index: creating database")
+
                 conn.execute("CREATE TABLE pdf_file (id INTEGER PRIMARY KEY, filename TEXT, fullpath TEXT UNIQUE, extention TEXT, size INTEGER, ctime INTEGER, mtime INTEGER, md5 TEXT, piece_id INTEGER);");
                 conn.execute("CREATE TABLE pdf_piece (id INTEGER PRIMARY KEY, filename TEXT, fullpath TEXT UNIQUE, extention TEXT, size INTEGER, ctime INTEGER, mtime INTEGER, md5 TEXT, facture_type TEXT, facture_author TEXT, facture_client TEXT, facture_identifier TEXT, facture_date DATE, facture_libelle TEXT, facture_prix_ht FLOAT, facture_prix_tax FLOAT, facture_prix_ttc FLOAT, facture_devise TEXT, paiement_comment TEXT, paiement_date DATE, paiement_proof TEXT, banque_id INTEGER,      exercice_comptable TEXT, CONSTRAINT constraint_name UNIQUE (md5) );");
                 conn.execute("CREATE TABLE pdf_banque (id INTEGER PRIMARY KEY, date DATE, raw TEXT, amount FLOAT, type TEXT, banque_account TEXT, rdate DATE, vdate DATE, label TEXT, piece_id INTEGER, ctime INTEGER, mtime INTEGER, CONSTRAINT constraint_name UNIQUE (date, raw) );");
 
+
+            if os.environ.get('VERBOSE', None):
+                 print("Index: indexing files from %s" % path)
+
             for file in glob.glob(path+'/**/*pdf', recursive=True):
                 need_consolidate = Indexer.index_pdf(file, last, conn) or need_consolidate
+
+
+            if os.environ.get('VERBOSE', None):
+                print("Index: indexing banque")
 
             need_consolidate = Indexer.index_banque('https://raw.githubusercontent.com/24eme/banque/master/data/history.csv', force, conn) or need_consolidate
 
