@@ -139,7 +139,6 @@ def banque_associate_file(request, banque_id):
         nb += 1
         distance += compare_strings(piece.facture_identifier, banque.raw)
         nb += 1
-        print([piece.facture_libelle, piece.facture_date])
         if piece.facture_date:
             thediff = (int(banque.date.strftime('%s')) - int(piece.facture_date.strftime('%s'))) / (60*60*24*30*6)
             if thediff <= 1 and thediff >= -0.03:
