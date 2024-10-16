@@ -34,9 +34,9 @@ def piece_list(request):
 
 def file_list(request):
     Indexer.Indexer.update()
-    last_update = File.objects.order_by('-mtime')[0]
+    last_update = File.objects.order_by('-date')[0]
     context = {
-        "files": File.objects.order_by('-ctime'),
+        "files": File.objects.order_by('-date'),
         "last_updated_tupple": last_update
     }
     return render(request, "file_list.html", context)

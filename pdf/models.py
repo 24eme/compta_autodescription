@@ -56,13 +56,11 @@ class File(models.Model):
     fullpath = models.TextField(null=True, unique=True)
     extention = models.TextField(null=True)
     size = models.IntegerField(null=True)
+    date = models.DateField(null=True)
     ctime = models.IntegerField(null=True)
     mtime = models.IntegerField(null=True)
     md5 = models.CharField(max_length=32,null=True)
     piece = models.ForeignKey(Piece, on_delete=models.SET_NULL, null=True)
-    def date(self, format='%d/%m/%Y'):
-        import time
-        return  time.strftime(format, time.gmtime(self.ctime))
     def getModified(self, format='%d/%m/%Y %H:%M:%S'):
         import time
         return  time.strftime(format, time.gmtime(self.mtime))

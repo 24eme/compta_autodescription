@@ -17,7 +17,7 @@
 {% for f in files %}
     <tr class="{% if f.piece_id and f.piece.paiement_proof %}table-success{% endif %}">
       <td>
-        <div class="">{{ f.date }}</div>
+        <div class="">{{ f.date|date:"d/m/Y" }}</div>
       </td>
       <td>
         <div class="">{{ f.filename }}</div>

@@ -3,6 +3,7 @@ from pdfminer.pdfdocument import PDFDocument
 import glob, sys, os, hashlib
 import sqlite3
 import re
+import time
 from django.db import models
 
 class Indexer(object):
@@ -60,18 +61,42 @@ class Indexer(object):
         meta['md5'] = hash_md5.hexdigest()
         meta['ctime'] = os.path.getctime(file)
         meta['mtime'] = mtime
+        filename = os.path.basename(file)
+        file_date = None
+        searchisodate = re.search(r'(^|[^0-9])(20[0-9][0-9])-?([01][0-9])-?([0-9][0-9])', filename)
+        searchfradate = re.search(r'(^|[^0-9])([0-9][0-9])[-_]?([01][0-9])[-_]?(20[0-9][0-9])', filename)
+        searchpdfdate = None
+        if meta.get('CreationDate'):
+            searchpdfdate = re.search(r'(^|[^0-9])(20[0-9][0-9])-?([01][0-9])-?([0-9][0-9])', meta['CreationDate'])
+        if meta.get('facture:date'):
+            file_date = meta['facture:date']
+        elif searchisodate and int(searchisodate.group(2)) > 2000 and int(searchisodate.group(2)) < 2100 and int(searchisodate.group(3)) < 13 and int(searchisodate.group(4)) < 32:
+            file_date = searchisodate.group(2) + '-' + searchisodate.group(3) + '-' + searchisodate.group(4)
+        elif searchfradate and int(searchfradate.group(4)) > 2000 and int(searchfradate.group(4)) < 2100 and int(searchfradate.group(3)) < 13 and int(searchfradate.group(2)) < 32:
+            file_date = searchfradate.group(4) + '-' + searchfradate.group(3) + '-' + searchfradate.group(2)
+        elif searchpdfdate and int(searchpdfdate.group(2)) > 2000 and int(searchpdfdate.group(2)) < 2100 and int(searchpdfdate.group(3)) < 13 and int(searchpdfdate.group(4)) < 32:
+            file_date = searchpdfdate.group(2) + '-' + searchpdfdate.group(3) + '-' + searchpdfdate.group(4)
+        else:
+            file_date = time.strftime('%Y-%m-%d', time.gmtime(meta['ctime']))
+
+        if meta.get('ModDate'):
+            searchpdfdate = re.search(r'(^|[^0-9])(20[0-9][0-9])-?([01][0-9])-?([0-9][0-9])', meta['ModDate'])
+            if searchpdfdate and int(searchpdfdate.group(2)) > 2000 and int(searchpdfdate.group(2)) < 2100 and int(searchpdfdate.group(3)) < 13 and int(searchpdfdate.group(4)) < 32:
+                file_date2 = searchpdfdate.group(2) + '-' + searchpdfdate.group(3) + '-' + searchpdfdate.group(4)
+            if file_date2 < file_date:
+                file_date = file_date2
 
         res = conn.execute("SELECT id FROM pdf_file WHERE fullpath = \"%s\" OR md5 = \"%s\"" % (file, meta['md5']))
         has_file = res.fetchone()
         if not has_file:
-            sql = "INSERT INTO pdf_file (fullpath, filename, md5, ctime, mtime) VALUES (\"%s\", \"%s\", \"%s\", %d, %d) ; " % (file, os.path.basename(file), meta['md5'], meta['ctime'], meta['mtime'])
+            sql = "INSERT INTO pdf_file (fullpath, filename, md5, date, ctime, mtime) VALUES (\"%s\", \"%s\", \"%s\", \"%s\", %d, %d) ; " % (file, filename, meta['md5'], file_date, meta['ctime'], meta['mtime'])
             conn.execute(sql)
         else:
-            sql = 'UPDATE pdf_file SET filename = "%s", md5 = "%s", mtime = %d WHERE fullpath = "%s" OR md5 = "%s"' % (os.path.basename(file), meta['md5'], meta['mtime'], file, meta['md5'])
+            sql = 'UPDATE pdf_file SET filename = "%s", md5 = "%s", mtime = %d, date = "%s" WHERE fullpath = "%s" OR md5 = "%s"' % (filename, meta['md5'], meta['mtime'], file_date, file, meta['md5'])
             conn.execute(sql)
 
         sql_update = "UPDATE pdf_piece SET "
-        sql_update = sql_update + " filename = \"%s\", extention = \"pdf\" " % os.path.basename(file)
+        sql_update = sql_update + " filename = \"%s\", extention = \"pdf\" " % filename
         sql_update = sql_update + ', md5 = "%s"' % meta['md5']
         sql_update = sql_update + ', mtime = %d' % meta['mtime']
         sql_update = sql_update + ", fullpath = \"%s\" " % file
@@ -127,7 +152,7 @@ class Indexer(object):
 
         res = conn.execute("SELECT * FROM pdf_piece WHERE fullpath = \"%s\" OR md5 = \"%s\"" % (file, meta['md5']))
         has_piece = res.fetchone()
-        sql = "INSERT INTO pdf_piece (fullpath, filename, md5, ctime, mtime) VALUES (\"%s\", \"%s\", \"%s\", %d, %d) ; " % (file, os.path.basename(file), meta['md5'], meta['ctime'], meta['mtime'])
+        sql = "INSERT INTO pdf_piece (fullpath, filename, md5, ctime, mtime) VALUES (\"%s\", \"%s\", \"%s\", %d, %d) ; " % (file, filename, meta['md5'], meta['ctime'], meta['mtime'])
         if not has_piece:
             conn.execute(sql)
 
@@ -252,6 +277,7 @@ class Indexer(object):
                 if banqueid:
                     conn.execute("UPDATE pdf_piece SET banque_id = %d WHERE id = %d" % (banqueid,  row['id']) )
                     conn.execute("UPDATE pdf_banque SET piece_id = %d WHERE id = %d" % (row['id'], banqueid) )
+                    conn.execute("UPDATE pdf_file SET date = \"%s\" WHERE date IS NULL AND md5 = \"%s\"" % (paiement_date, row['md5']))
         conn.commit()
 
         res = conn.execute("SELECT id, md5 FROM pdf_file WHERE piece_id IS NULL")
@@ -277,7 +303,7 @@ class Indexer(object):
                 if os.environ.get('VERBOSE', None):
                     print("Index: creating database")
 
-                conn.execute("CREATE TABLE pdf_file (id INTEGER PRIMARY KEY, filename TEXT, fullpath TEXT UNIQUE, extention TEXT, size INTEGER, ctime INTEGER, mtime INTEGER, md5 TEXT, piece_id INTEGER);");
+                conn.execute("CREATE TABLE pdf_file (id INTEGER PRIMARY KEY, filename TEXT, fullpath TEXT UNIQUE, extention TEXT, size INTEGER, date DATE, ctime INTEGER, mtime INTEGER, md5 TEXT, piece_id INTEGER);");
                 conn.execute("CREATE TABLE pdf_piece (id INTEGER PRIMARY KEY, filename TEXT, fullpath TEXT UNIQUE, extention TEXT, size INTEGER, ctime INTEGER, mtime INTEGER, md5 TEXT, facture_type TEXT, facture_author TEXT, facture_client TEXT, facture_identifier TEXT, facture_date DATE, facture_libelle TEXT, facture_prix_ht FLOAT, facture_prix_tax FLOAT, facture_prix_ttc FLOAT, facture_devise TEXT, paiement_comment TEXT, paiement_date DATE, paiement_proof TEXT, banque_id INTEGER,      exercice_comptable TEXT, CONSTRAINT constraint_name UNIQUE (md5) );");
                 conn.execute("CREATE TABLE pdf_banque (id INTEGER PRIMARY KEY, date DATE, raw TEXT, amount FLOAT, type TEXT, banque_account TEXT, rdate DATE, vdate DATE, label TEXT, piece_id INTEGER, ctime INTEGER, mtime INTEGER, CONSTRAINT constraint_name UNIQUE (date, raw) );");
 
