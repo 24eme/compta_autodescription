@@ -37,9 +37,10 @@ class Indexer(object):
 
     @staticmethod
     def index_pdf(file, last, conn):
-        exclude = os.environ.get('COMPTA_PDF_EXCLUDE_PATH', None)
-        if exclude and file.find(exclude) > -1:
-            return False
+        excludes = os.environ.get('COMPTA_PDF_EXCLUDE_PATH', None)
+        for exclude in excludes.split('|'):
+            if exclude and file.find(exclude) > -1:
+                return False
 
         mtime = os.path.getmtime(file)
         if  mtime <= last:
