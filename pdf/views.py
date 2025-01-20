@@ -152,8 +152,12 @@ def banque_associate_file(request, banque_id):
                 distance += abs(thediff)
                 nb += 1
         if piece.facture_prix_ttc:
-            distance += 2 * abs(abs(piece.facture_prix_ttc) - abs(banque.amount)) / abs(piece.facture_prix_ttc)
-            nb += 2
+            if abs(piece.facture_prix_ttc) == abs(banque.amount):
+                nb += 3
+                distance = 0
+            else:
+                distance += 2 * abs(abs(piece.facture_prix_ttc) - abs(banque.amount)) / abs(piece.facture_prix_ttc)
+                nb += 2
         file = piece.getFile()
         if file:
             distance += compare_strings(file.fullpath, banque.raw)

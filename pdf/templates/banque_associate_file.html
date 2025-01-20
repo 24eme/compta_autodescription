@@ -40,7 +40,7 @@
         {% endif %}
       </div>
     </td>
-    <td><div class="text-end">{{ metafile.piece.facture_prix_ttc|floatformat:2 }} €</div></td>
+    <td><div class="text-end">{{ metafile.piece.facture_prix_ttc|floatformat:2 }} €<br/><small class="text-muted">{{ metafile.distance|floatformat:3 }}</small></div></td>
     {% elif metafile.file %}
     <td><div>{{ metafile.file.date }}</div></td>
     <td>

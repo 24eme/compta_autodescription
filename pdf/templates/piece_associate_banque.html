@@ -25,7 +25,7 @@
         {% endif %}
       </div>
     </th>
-    <th><div class="text-end">{{ piece.facture_prix_ttc|floatformat:2 }} €</div></th>
+    <th><div class="text-end">{{ piece.facture_prix_ttc|floatformat:2 }} €<br/><small class="text-muted">{{ metafile.distance|floatformat:3 }}</small></div></th>
     <td><a href="../pdf/{{ piece.md5 }}">Voir la pièce</a></td>
   </tr>
   <tr>
