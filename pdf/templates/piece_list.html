@@ -2,8 +2,14 @@
 {% block title %}Liste des factures{% endblock %}
 {% block content %}
 <div class="row">
-<h1 class="col-9">Les factures</h1>
-<div class="col-3 p-4 text-end">Last mod. : {{ last_updated_tupple.getModified }} <a href="?"><i class="bi bi-arrow-clockwise"></i></a></div>
+<h1 class="col-9">
+  Les factures
+  {% if unpaid %}non payées{% endif %}
+</h1>
+<div class="col-3 p-4 text-end">
+  Last mod. : {{ last_updated_tupple.getModified }} <a href="?"><i class="bi bi-arrow-clockwise"></i></a>
+  <div>{% if not client or not author %}{% if unpaid %}<a href="?">Voir toutes les factures</a>{% else %}<a href="?unpaid=true">Voir les factures impayées</a>{% endif %}{% endif %}</div>
+</div>
 </div>
 <table class="table table-striped">
   <thead>
@@ -18,9 +24,9 @@
     <tr class="{% if p.banque %}table-success{% endif %}">
       <td>
         <div class="fw-bold">
-            {{ p.facture_author }}
+            <a href="?author={{ p.facture_author }}">{{ p.facture_author }}</a>
              ->
-            {{ p.facture_client }}
+            <a href="?client={{ p.facture_client }}">{{ p.facture_client }}</a>
         </div>
         <div class="">{{ p.facture_date|date:"d/m/Y" }}</div>
       </td>

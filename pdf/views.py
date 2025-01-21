@@ -25,9 +25,25 @@ def banque_list(request):
 def piece_list(request):
     Indexer.Indexer.update()
     last_update = File.objects.order_by('-mtime')[0]
+    pieces_query = Piece.objects
+    client = request.GET.get('client')
+    if client:
+        pieces_query = pieces_query.filter(facture_client=client)
+    author = request.GET.get('author')
+    if author:
+        pieces_query = pieces_query.filter(facture_author=author)
+
+    unpaid = False
+    if request.GET.get('unpaid'):
+        pieces_query = pieces_query.filter(banque_id = None)
+        unpaid = True
+
     context = {
-        "pieces": Piece.objects.order_by('-facture_date'),
-        "last_updated_tupple": last_update
+        "pieces": pieces_query.order_by('-facture_date'),
+        "last_updated_tupple": last_update,
+        "client": client,
+        "author": author,
+        "unpaid": unpaid
     }
     return render(request, "piece_list.html", context)
 
