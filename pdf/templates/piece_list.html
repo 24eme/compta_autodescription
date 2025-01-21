@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% block title %}Liste des factures{% endblock %}
+{% block title %}Liste des factures {% if unpaid %}non payées{% endif %}{% endblock %}
 {% block content %}
 <div class="row">
 <h1 class="col-9">
