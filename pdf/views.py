@@ -63,7 +63,7 @@ def pdf_edit(request, md5):
     banque = None
     if request.GET.get('banque_id'):
         banque = Banque.objects.get(pk=request.GET.get('banque_id'))
-    elif file and file.piece and file.piece.banque_id:
+    elif file and file.piece and file.piece.banque_id and file.piece.banque_id < 999000:
         banque = Banque.objects.get(pk=file.piece.banque_id)
     context = {
         "file": files,
