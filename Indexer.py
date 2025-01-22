@@ -279,6 +279,15 @@ class Indexer(object):
                     conn.execute("UPDATE pdf_piece SET banque_id = %d WHERE id = %d" % (banqueid,  row['id']) )
                     conn.execute("UPDATE pdf_banque SET piece_id = %d WHERE id = %d" % (row['id'], banqueid) )
                     conn.execute("UPDATE pdf_file SET date = \"%s\" WHERE date IS NULL AND md5 = \"%s\"" % (paiement_date, row['md5']))
+                else:
+                    paiement_facture_id = re.sub(r'[^0-9]*', '', paiement_proof)
+                    if paiement_facture_id:
+                        res = conn.execute("SELECT id FROM pdf_piece WHERE facture_identifier = \"%s\" and facture_date = \"%s\";" % (paiement_facture_id, dates[0]));
+                        rows = res.fetchall()
+                        if len(rows) == 1:
+                            conn.execute("UPDATE pdf_piece SET banque_id = 999000%d WHERE id = %d" % (rows[0]['id'],  row['id']))
+
+
         conn.commit()
 
         res = conn.execute("SELECT id, md5 FROM pdf_file WHERE piece_id IS NULL")

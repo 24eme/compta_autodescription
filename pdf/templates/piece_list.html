@@ -21,7 +21,7 @@
     </tr>
   </thead>
 {% for p in pieces %}
-    <tr class="{% if p.banque %}table-success{% endif %}">
+    <tr class="{% if p.banque_id %}table-success{% endif %}">
       <td>
         <div class="fw-bold">
             <a href="?author={{ p.facture_author }}">{{ p.facture_author }}</a>
@@ -41,7 +41,7 @@
       </td>
       <td>
         <div class="text-center">
-        {% if not p.banque %}
+        {% if not p.banque_id %}
         <span class="badge text-bg-secondary rounded-pill">Paiement manquant</span>
         {% else %}
           <span class="badge text-bg-success rounded-pill">Paiement ok</span>
@@ -51,7 +51,7 @@
       </td>
       <td>
         <div>
-          {% if not p.banque %}
+          {% if not p.banque_id %}
           <a href="./piece/{{ p.md5 }}">Rapprocher</a>
           {% else %}
           <a href="./pdf/{{ p.md5 }}">Voir la pièce</a>
