@@ -67,7 +67,7 @@ class Indexer(object):
         searchisodate = re.search(r'(^|[^0-9])(20[0-9][0-9])-?([01][0-9])-?([0-9][0-9])', filename)
         searchfradate = re.search(r'(^|[^0-9])([0-9][0-9])[-_]?([01][0-9])[-_]?(20[0-9][0-9])', filename)
         searchpdfdate = None
-        if meta.get('CreationDate'):
+        if meta.get('CreationDate') and isinstance(meta['CreationDate'], str):
             searchpdfdate = re.search(r'(^|[^0-9])(20[0-9][0-9])-?([01][0-9])-?([0-9][0-9])', meta['CreationDate'])
         if meta.get('facture:date'):
             file_date = meta['facture:date']
