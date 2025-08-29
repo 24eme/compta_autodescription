@@ -101,10 +101,10 @@ def compare_strings(a, b):
 
 def piece_pre_associate(request, id):
     Indexer.Indexer.update()
-    piece = Piece.objects.filter(id=id).first()
-    if not piece:
+    file = File.objects.filter(id=id).first()
+    if not file:
         return redirect('/banque')
-    return redirect('/piece/'+piece.md5)
+    return redirect('/piece/'+file.md5)
 
 
 def piece_associate_banque(request, md5):
