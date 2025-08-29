@@ -24,8 +24,9 @@
   <p class="px-5"><span class="text-muted">facture:TTC</span><br/>{{ banque.amount|floatformat:2 }}</p>
 </div>
 {% else %}
-<div>
-  <a href="../files"><< Retour aux fichiers</a>
+<div class="row">
+  <div class="col-6"><a href="../files"><< Retour aux fichiers</a></div>
+  <div class="col-6"><a href="../piece/{{ file.md5 }}?update=true">Rapprocher >>> </a></div>
 </div>
 <div class="d-flex">
   <p>Champs attendus pour les pièces : </p>

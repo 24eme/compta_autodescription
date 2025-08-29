@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.http import HttpResponse
 from django.template import loader
 
@@ -73,7 +73,7 @@ def pdf_edit(request, md5):
     elif file and file.piece and file.piece.banque_id and file.piece.banque_id < 999000:
         banque = Banque.objects.get(pk=file.piece.banque_id)
     context = {
-        "file": files,
+        "file": file,
         "pdf_edit_full_url": os.environ.get('COMPTA_PDF_URL')+files[0].fullpath.replace(os.environ.get('COMPTA_PDF_BASE_PATH'), '').replace('+','%2b'),
         "banque": banque,
         "back_banque": request.GET.get('back') == 'banque'
@@ -100,7 +100,11 @@ def compare_strings(a, b):
 
 
 def piece_associate_banque(request, md5):
+    if request.GET.get('update'):
+        Indexer.Indexer.update()
     piece = Piece.objects.filter(md5=md5).first()
+    if not piece:
+        return redirect('/banque')
     file = piece.getFile()
     banques = {}
     banque_objects = Banque.objects.filter(piece=None)
