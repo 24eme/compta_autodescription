@@ -47,6 +47,17 @@ class Piece(models.Model):
     paiement_proof = models.TextField(null=True)
     banque = models.ForeignKey(Banque, on_delete=models.SET_NULL, null=True)
     exercice_comptable = models.TextField(null=True)
+
+    def getPrixHT(self):
+        if self.facture_type == 'AVOIR':
+            return abs(self.facture_prix_ht) * -1
+        return abs(self.facture_prix_ht)
+
+    def getPrixTTC(self):
+        if self.facture_type == 'AVOIR':
+            return abs(self.facture_prix_ttc) * -1
+        return abs(self.facture_prix_ttc)
+
     def getFile(self):
         f = File.objects.filter(md5=self.md5).first()
         return f
