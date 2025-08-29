@@ -103,7 +103,7 @@ class Indexer(object):
         sql_update = sql_update + ", fullpath = \"%s\" " % file
         need_update = False
         if meta.get('facture:type'):
-            sql_update = sql_update + ", facture_type = \"%s\"" % meta['facture:type']
+            sql_update = sql_update + ", facture_type = \"%s\"" % meta['facture:type'].replace(' ', '')
             need_update = True
         if meta.get('facture:author'):
             sql_update = sql_update + ", facture_author = \"%s\" " % meta['facture:author']
