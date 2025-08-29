@@ -38,6 +38,9 @@ def piece_list(request):
         pieces_query = pieces_query.filter(banque_id = None)
         unpaid = True
 
+    if request.GET.get('export') == 'csv':
+        return render(request, "export.csv", {'pieces': pieces_query.order_by('-facture_date')}, 'text/csv; charset=utf-8')
+
     context = {
         "pieces": pieces_query.order_by('-facture_date'),
         "last_updated_tupple": last_update,

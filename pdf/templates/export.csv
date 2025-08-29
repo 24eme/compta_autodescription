@@ -1,0 +1,4 @@
+{% autoescape off %}Facture identifiant;Facture date;Facture auteur;Facture client;Facture libellé;Facture HT;Facture TTC;Paiement date;Paiement preuve
+{% for p in pieces %}{{p.facture_identifier|default_if_none:""}};{{p.facture_date|date:"Y-m-d"}};{{p.facture_author|default_if_none:""}};{{p.facture_client|default_if_none:""}};{{p.facture_libelle|default_if_none:""}};{{p.facture_prix_ht|default_if_none:""}};{{p.facture_prix_ttc|default_if_none:""}};{{p.paiement_date|date:"Y-m-d"}};{{p.paiement_proof|default_if_none:""}}
+{% endfor %}
+{% endautoescape %}
