@@ -38,6 +38,10 @@ def piece_list(request):
         pieces_query = pieces_query.filter(banque_id = None)
         unpaid = True
 
+    query_string = '?'
+    for arg in request.GET:
+        query_string += arg+'='+request.GET.get(arg)+'&'
+
     if request.GET.get('export') == 'csv':
         return render(request, "export.csv", {'pieces': pieces_query.order_by('-facture_date')}, 'text/csv; charset=utf-8')
 
@@ -46,10 +50,10 @@ def piece_list(request):
         "last_updated_tupple": last_update,
         "client": client,
         "author": author,
-        "unpaid": unpaid
+        "unpaid": unpaid,
+        "query_string": query_string
     }
     return render(request, "piece_list.html", context)
-
 
 def file_list(request):
     Indexer.Indexer.update()

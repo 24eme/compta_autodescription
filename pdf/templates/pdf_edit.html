@@ -40,10 +40,23 @@
 {% endif %}
 </div>
 <div style="height: 1024px; width: 100%">
-  <iframe src="{{ pdf_edit_full_url }}" style="height: 100%; width: 100%">
+  <iframe src="{{ pdf_edit_full_url }}" style="height: 100%; width: 100%" id="frame_pdf_edit">
   </iframe>
 </div>
 {% if banque %}
+<script type="text/javascript">
+  function sendNewMeta(k, v) {
+      console.log('sending '+k+":"+v);
+      const iframe = document.getElementById('frame_pdf_edit');
+      // Envoyer un message à l'iframe
+      iframe.contentWindow.postMessage({
+          action: 'addMetadata',
+          key: k,
+          value: v
+      }, '*'); // Remplacez '*' par le domaine spécifique pour plus de sécurité
+      return false;
+  };
+</script>
 <div class="d-flex">
   <p class="px-2">
     <br/>
@@ -53,8 +66,8 @@
     Rappel info bancaire :
     {% endif %}
   </p>
-  <p class="px-5"><span class="text-muted">paiement:date</span><br/>{{ banque.date|date:"Y-m-d" }}</p>
-  <p class="px-5"><span class="text-muted">paiement:proof</span><br/>{{ banque.raw }}</p>
+  <p class="px-5"><span class="text-muted">paiement:date</span><br/>{{ banque.date|date:"Y-m-d" }} <span class="text-muted"><a href="#" onclick="sendNewMeta('paiement:date','{{ banque.date|date:"Y-m-d" }}');return false;"> 📤 </a></span></p>
+  <p class="px-5"><span class="text-muted">paiement:proof</span><br/>{{ banque.raw }} <span class="text-muted"><a href="#" onclick="sendNewMeta('paiement:proof','{{ banque.raw }}');return false;"> 📤 </a></span></p>
   <p class="px-5"><span class="text-muted">facture:TTC</span><br/>{{ banque.amount|floatformat:2 }}</p>
 </div>
 <div>

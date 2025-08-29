@@ -9,6 +9,7 @@
 <div class="col-3 p-4 text-end">
   Last mod. : {{ last_updated_tupple.getModified }} <a href="?"><i class="bi bi-arrow-clockwise"></i></a>
   <div>{% if not client or not author %}{% if unpaid %}<a href="?">Voir toutes les factures</a>{% else %}<a href="?unpaid=true">Voir les factures impayées</a>{% endif %}{% endif %}</div>
+  <div><a href="{{query_string}}export=csv">Export CSV</a></div>
 </div>
 </div>
 <table class="table table-striped">
