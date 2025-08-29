@@ -99,9 +99,15 @@ def compare_strings(a, b):
     return 1 - len(list(set(a_ngrams) & set(b_ngrams))) / len(a_ngrams);
 
 
+def piece_pre_associate(request, id):
+    Indexer.Indexer.update()
+    piece = Piece.objects.filter(id=id).first()
+    if not piece:
+        return redirect('/banque')
+    return redirect('/piece/'+piece.md5)
+
+
 def piece_associate_banque(request, md5):
-    if request.GET.get('update'):
-        Indexer.Indexer.update()
     piece = Piece.objects.filter(md5=md5).first()
     if not piece:
         return redirect('/banque')

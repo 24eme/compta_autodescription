@@ -28,6 +28,7 @@ urlpatterns = [
     path("piece/<str:md5>", views.piece_associate_banque, name="piece_associate_banque"),
     path("files", views.file_list, name="files_list"),
     path("pdf/<str:md5>", views.pdf_edit, name="pdf_edit"),
+    path("associate/<str:id>", views.piece_pre_associate, name="piece_pre_associate"),
 
     re_path(r"^static/(?P<path>.*)$", staticfiles.views.serve),
 ]
