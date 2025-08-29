@@ -66,9 +66,9 @@
     Rappel info bancaire :
     {% endif %}
   </p>
-  <p class="px-5"><span class="text-muted">paiement:date</span><br/>{{ banque.date|date:"Y-m-d" }} <span class="text-muted"><a href="#" onclick="sendNewMeta('paiement:date','{{ banque.date|date:"Y-m-d" }}');return false;"> 📤 </a></span></p>
-  <p class="px-5"><span class="text-muted">paiement:proof</span><br/>{{ banque.raw }} <span class="text-muted"><a href="#" onclick="sendNewMeta('paiement:proof','{{ banque.raw }}');return false;"> 📤 </a></span></p>
-  <p class="px-5"><span class="text-muted">facture:TTC</span><br/>{{ banque.amount|floatformat:2 }}</p>
+  <p class="px-5"><a class="btn" href="#" onclick="sendNewMeta('paiement:date','{{ banque.date|date:"Y-m-d" }}');return false;"><span class="text-muted">paiement:date</span><br/>{{ banque.date|date:"Y-m-d" }} <span class="text-muted"> 📤 </span></a></p>
+  <p class="px-5"><a class="btn" href="#" onclick="sendNewMeta('paiement:proof','{{ banque.raw }}');return false;"><span class="text-muted">paiement:proof</span><br/>{{ banque.raw }} <span class="text-muted"> 📤 </span></a></p>
+  <p class="px-5"><a class="btn"><span class="text-muted">facture:TTC</span><br/>{{ banque.amount|floatformat:2 }}</a></p>
 </div>
 <div>
   {% if back_banque %}
@@ -83,13 +83,13 @@
 </div>
 <div class="d-flex">
   <p>Champs attendus pour les pièces : </p>
-  <p class="px-2 text-muted">facture:identifier</p>
-  <p class="px-2 text-muted">facture:author</p>
-  <p class="px-2 text-muted">facture:client</p>
-  <p class="px-2 text-muted">facture:date</p>
-  <p class="px-2 text-muted">facture:TTC</p>
-  <p class="px-2 text-muted">facture:HT</p>
-  <p class="px-2 text-muted">facture:libelle</p>
+  <p class="px-2 text-muted"><a class="btn" href="#" onclick="sendNewMeta('facture:identifier','');return false;">facture:identifier</a></p>
+  <p class="px-2 text-muted"><a class="btn" href="#" onclick="sendNewMeta('facture:author','');return false;">facture:author</a></p>
+  <p class="px-2 text-muted"><a class="btn" href="#" onclick="sendNewMeta('facture:client','');return false;">facture:client</a></p>
+  <p class="px-2 text-muted"><a class="btn" href="#" onclick="sendNewMeta('facture:date','');return false;">facture:date</a></p>
+  <p class="px-2 text-muted"><a class="btn" href="#" onclick="sendNewMeta('facture:TTC','');return false;">facture:TTC</a></p>
+  <p class="px-2 text-muted"><a class="btn" href="#" onclick="sendNewMeta('facture:HT','');return false;">facture:HT</a></p>
+  <p class="px-2 text-muted"><a class="btn" href="#" onclick="sendNewMeta('facture:libelle','');return false;">facture:libelle</a></p>
 </div>
 {% endif %}
 {% endblock %}
