@@ -34,6 +34,7 @@ class Indexer(object):
             try:
                 meta[m] = meta[m].encode('iso8859-1').decode('utf-8')
             except:
+                print(meta)
                 raise
         return meta
 
