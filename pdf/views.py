@@ -58,9 +58,14 @@ def piece_list(request):
 def file_list(request):
     Indexer.Indexer.update()
     last_update = File.objects.order_by('-date')[0]
+    files = File.objects
+    pdf_only = not request.GET.get('withimages')
+    if pdf_only:
+        files = files.filter(extention="pdf")
     context = {
-        "files": File.objects.order_by('-date'),
-        "last_updated_tupple": last_update
+        "files": files.order_by('-date'),
+        "last_updated_tupple": last_update,
+        "pdf_only": pdf_only
     }
     return render(request, "file_list.html", context)
 

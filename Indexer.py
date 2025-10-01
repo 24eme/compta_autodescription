@@ -38,6 +38,43 @@ class Indexer(object):
         return meta
 
     @staticmethod
+    def index_image(file, last, conn):
+        excludes = os.environ.get('COMPTA_PDF_EXCLUDE_PATH', None)
+        for exclude in excludes.split('|'):
+            if exclude and file.find(exclude) > -1:
+                return False
+
+        res = conn.execute("SELECT id FROM pdf_file where fullpath = \"%s\"" % file.replace('png', 'pdf'));
+        for row in res:
+            conn.execute("DELETE FROM pdf_file where fullpath = \"%s\"" % file);
+            return False
+
+        mtime = os.path.getmtime(file)
+        if  mtime <= last:
+            return False
+
+        fp = open(file, 'rb')
+        hash_md5 = hashlib.md5()
+        for chunk in iter(lambda: fp.read(4096), b""):
+            hash_md5.update(chunk)
+
+        meta = {}
+        meta['md5'] = hash_md5.hexdigest()
+        meta['ctime'] = os.path.getctime(file)
+        meta['mtime'] = mtime
+        filename = os.path.basename(file)
+        file_date = time.strftime('%Y-%m-%d', time.gmtime(meta['ctime']))
+
+        res = conn.execute("SELECT id FROM pdf_file WHERE fullpath = \"%s\" OR md5 = \"%s\"" % (file, meta['md5']))
+        has_file = res.fetchone()
+        if not has_file:
+            sql = "INSERT INTO pdf_file (fullpath, filename, md5, date, ctime, mtime, extention) VALUES (\"%s\", \"%s\", \"%s\", \"%s\", %d, %d, \"image\") ; " % (file, filename, meta['md5'], file_date, meta['ctime'], meta['mtime'])
+            conn.execute(sql)
+        else:
+            sql = 'UPDATE pdf_file SET filename = "%s", md5 = "%s", mtime = %d, date = "%s" WHERE fullpath = "%s" OR md5 = "%s"' % (filename, meta['md5'], meta['mtime'], file_date, file, meta['md5'])
+            conn.execute(sql)
+
+    @staticmethod
     def index_pdf(file, last, conn):
         excludes = os.environ.get('COMPTA_PDF_EXCLUDE_PATH', None)
         for exclude in excludes.split('|'):
@@ -55,6 +92,7 @@ class Indexer(object):
             meta = doc.info[0]
         except IndexError:
             meta = {}
+        meta['file'] = file
         meta = Indexer.homogeneise_meta(meta)
 
         fp.seek(0)
@@ -92,7 +130,7 @@ class Indexer(object):
         res = conn.execute("SELECT id FROM pdf_file WHERE fullpath = \"%s\" OR md5 = \"%s\"" % (file, meta['md5']))
         has_file = res.fetchone()
         if not has_file:
-            sql = "INSERT INTO pdf_file (fullpath, filename, md5, date, ctime, mtime) VALUES (\"%s\", \"%s\", \"%s\", \"%s\", %d, %d) ; " % (file, filename, meta['md5'], file_date, meta['ctime'], meta['mtime'])
+            sql = "INSERT INTO pdf_file (fullpath, filename, md5, date, ctime, mtime, extention) VALUES (\"%s\", \"%s\", \"%s\", \"%s\", %d, %d, \"pdf\") ; " % (file, filename, meta['md5'], file_date, meta['ctime'], meta['mtime'])
             conn.execute(sql)
         else:
             sql = 'UPDATE pdf_file SET filename = "%s", md5 = "%s", mtime = %d, date = "%s" WHERE fullpath = "%s" OR md5 = "%s"' % (filename, meta['md5'], meta['mtime'], file_date, file, meta['md5'])
@@ -327,6 +365,12 @@ class Indexer(object):
 
             for file in glob.glob(path+'/**/*pdf', recursive=True):
                 need_consolidate = Indexer.index_pdf(file, last, conn) or need_consolidate
+            for file in glob.glob(path+'/**/*png', recursive=True):
+                need_consolidate = Indexer.index_image(file, last, conn) or need_consolidate
+            for file in glob.glob(path+'/**/*jpg', recursive=True):
+                need_consolidate = Indexer.index_image(file, last, conn) or need_consolidate
+            for file in glob.glob(path+'/**/*jpeg', recursive=True):
+                need_consolidate = Indexer.index_image(file, last, conn) or need_consolidate
 
 
             if os.environ.get('VERBOSE', None):

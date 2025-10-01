@@ -2,7 +2,15 @@
 {% block title %}Liste des factures{% endblock %}
 {% block content %}
 <div class="row">
-<h1 class="col-9">Les fichiers</h1>
+<div class="col-9">
+{% if pdf_only %}
+  <h1>Les fichiers PDF</h1>
+  <a href="?withimages=true">Intégrer les images</a>
+{% else %}
+<h1>Les fichiers PDF et les images</h1>
+<a href="?">Voir que les pdf</a>
+{% endif %}
+</div>
 <div class="col-3 p-4 text-end">Last mod. : {{ last_updated_tupple.getModified }} <a href="?"><i class="bi bi-arrow-clockwise"></i></a></div>
 </div>
 <table class="table table-striped">
