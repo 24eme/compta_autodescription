@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
                 ('paiement_date', models.DateTimeField(null=True)),
                 ('paiement_proof', models.TextField(null=True)),
                 ('banque', models.IntegerField(null=True)),
-                ('exercice_comptable', models.TextField(null=True)),
+                ('compte_exercice', models.TextField(null=True)),
             ],
         ),
         migrations.CreateModel(

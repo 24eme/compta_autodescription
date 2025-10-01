@@ -46,7 +46,8 @@ class Piece(models.Model):
     paiement_date = models.DateField(null=True)
     paiement_proof = models.TextField(null=True)
     banque = models.ForeignKey(Banque, on_delete=models.SET_NULL, null=True)
-    exercice_comptable = models.TextField(null=True)
+    compta_exercice = models.TextField(null=True)
+    compta_export_date = models.TextField(null=True)
 
     def getFile(self):
         f = File.objects.filter(md5=self.md5).first()
