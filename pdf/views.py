@@ -55,6 +55,10 @@ def piece_list(request):
     }
     return render(request, "piece_list.html", context)
 
+def file_update(request):
+    Indexer.Indexer.update()
+    return HttpResponse("updated")
+
 def file_list(request):
     Indexer.Indexer.update()
     last_update = File.objects.order_by('-date')[0]
