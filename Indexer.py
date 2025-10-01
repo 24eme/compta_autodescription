@@ -4,6 +4,8 @@ import glob, sys, os, hashlib
 import sqlite3
 import re
 import time
+from datetime import date
+from dateutil.relativedelta import relativedelta
 from django.db import models
 
 class Indexer(object):
@@ -119,6 +121,8 @@ class Indexer(object):
             need_update = True
         if meta.get('facture:date'):
             sql_update = sql_update + ", facture_date = \"%s\" " % meta['facture:date']
+            exercice_date = date.fromisoformat(meta['facture:date']) + relativedelta(months=-6)
+            sql_update = sql_update + ", exercice_comptable = \"%s\" " % exercice_date.year;
             need_update = True
         if meta.get('facture:libelle'):
             sql_update = sql_update + ", facture_libelle = \"%s\" " % meta['facture:libelle'];
