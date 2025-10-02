@@ -344,7 +344,7 @@ class Indexer(object):
 
 
     @staticmethod
-    def update_path(path, force):
+    def update_path(path, with_images, force):
         with sqlite3.connect('db/database.sqlite') as conn:
             conn.row_factory = sqlite3.Row
             need_consolidate = False
@@ -369,13 +369,13 @@ class Indexer(object):
 
             for file in glob.glob(path+'/**/*pdf', recursive=True):
                 need_consolidate = Indexer.index_pdf(file, last, conn) or need_consolidate
-            for file in glob.glob(path+'/**/*png', recursive=True):
-                need_consolidate = Indexer.index_image(file, last, conn) or need_consolidate
-            for file in glob.glob(path+'/**/*jpg', recursive=True):
-                need_consolidate = Indexer.index_image(file, last, conn) or need_consolidate
-            for file in glob.glob(path+'/**/*jpeg', recursive=True):
-                need_consolidate = Indexer.index_image(file, last, conn) or need_consolidate
-
+            if with_images:
+                for file in glob.glob(path+'/**/*png', recursive=True):
+                    need_consolidate = Indexer.index_image(file, last, conn) or need_consolidate
+                for file in glob.glob(path+'/**/*jpg', recursive=True):
+                    need_consolidate = Indexer.index_image(file, last, conn) or need_consolidate
+                for file in glob.glob(path+'/**/*jpeg', recursive=True):
+                    need_consolidate = Indexer.index_image(file, last, conn) or need_consolidate
 
             if os.environ.get('VERBOSE', None):
                 print("Index: indexing banque")
@@ -387,9 +387,9 @@ class Indexer(object):
                 conn.commit()
 
     @staticmethod
-    def update(force = False):
+    def update(with_images = False, force = False):
         for subdir in os.environ.get('COMPTA_PDF_COMPTA_SUBDIR').split('|'):
-            Indexer.update_path(os.environ.get('COMPTA_PDF_BASE_PATH') + '/' + subdir, force)
+            Indexer.update_path(os.environ.get('COMPTA_PDF_BASE_PATH') + '/' + subdir, with_images, force)
 
 def main():
     Indexer.update_path(sys.argv[1], True)

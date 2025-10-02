@@ -13,7 +13,7 @@ def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
 
 def banque_list(request):
-    Indexer.Indexer.update(request.GET.get('force'))
+    Indexer.Indexer.update(False, request.GET.get('force'))
 
     last_update = Banque.objects.order_by('-mtime')[0]
     context = {
@@ -60,10 +60,12 @@ def file_update(request):
     return HttpResponse("updated")
 
 def file_list(request):
-    Indexer.Indexer.update()
+    pdf_only = not request.GET.get('withimages')
+
+    Indexer.Indexer.update(not pdf_only)
+
     last_update = File.objects.order_by('-date')[0]
     files = File.objects
-    pdf_only = not request.GET.get('withimages')
     if pdf_only:
         files = files.filter(extention="pdf")
     context = {
