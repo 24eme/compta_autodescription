@@ -214,7 +214,7 @@ def banque_associate_file(request, banque_id):
                 nb += 1
         pieces[piece.md5] = {"distance": distance/nb, "piece": piece, "file": piece.getFile()}
 
-    for file in File.objects.filter(piece_id=None):
+    for file in File.objects.filter(piece_id=None).filter(extention="pdf"):
         distance = 0
         nb = 0
         distance += compare_strings(file.fullpath, banque.raw)
