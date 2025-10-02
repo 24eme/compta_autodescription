@@ -1,0 +1,12 @@
+COMPTA_BIND=10.20.20.110:8000
+
+COMPTA_PDF_EXCLUDE_PATH="Cheques|Relevés Banque"
+COMPTA_PDF_URL="http://127.0.0.1:8888/metadata#local:"
+COMPTA_PDF_BASE_PATH="/home/user/Nextcloud/Compta"
+COMPTA_PDF_COMPTA_SUBDIR="Pieces|_Archives"
+
+COMPTA_EXERCICE_DATE_AGO="-6 month"
+COMPTA_EXPORT_DIR="/home/user/Nextcloud/Compta/export"
+
+PYTHON_ENV_DIR=env
+ALLOWED_HOSTS=127.0.0.1|::1

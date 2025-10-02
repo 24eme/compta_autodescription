@@ -4,3 +4,5 @@ tags
 db/
 config/config.ini
 */__pycache__
+__pycache__
+bin/config.inc
