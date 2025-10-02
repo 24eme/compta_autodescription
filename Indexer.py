@@ -64,7 +64,22 @@ class Indexer(object):
         meta['ctime'] = os.path.getctime(file)
         meta['mtime'] = mtime
         filename = os.path.basename(file)
-        file_date = time.strftime('%Y-%m-%d', time.gmtime(meta['ctime']))
+        file_date = None
+        searchisodate = re.search(r'(^|[^0-9])(20[0-9][0-9])-?([01][0-9])-?([0-9][0-9])', filename)
+        searchfradate = re.search(r'(^|[^0-9])([0-9][0-9])[-_]?([01][0-9])[-_]?(20[0-9][0-9])', filename)
+        searchpdfdate = None
+        if meta.get('CreationDate') and isinstance(meta['CreationDate'], str):
+            searchpdfdate = re.search(r'(^|[^0-9])(20[0-9][0-9])-?([01][0-9])-?([0-9][0-9])', meta['CreationDate'])
+        if meta.get('facture:date'):
+            file_date = meta['facture:date']
+        elif searchisodate and int(searchisodate.group(2)) > 2000 and int(searchisodate.group(2)) < 2100 and int(searchisodate.group(3)) < 13 and int(searchisodate.group(4)) < 32:
+            file_date = searchisodate.group(2) + '-' + searchisodate.group(3) + '-' + searchisodate.group(4)
+        elif searchfradate and int(searchfradate.group(4)) > 2000 and int(searchfradate.group(4)) < 2100 and int(searchfradate.group(3)) < 13 and int(searchfradate.group(2)) < 32:
+            file_date = searchfradate.group(4) + '-' + searchfradate.group(3) + '-' + searchfradate.group(2)
+        elif searchpdfdate and int(searchpdfdate.group(2)) > 2000 and int(searchpdfdate.group(2)) < 2100 and int(searchpdfdate.group(3)) < 13 and int(searchpdfdate.group(4)) < 32:
+            file_date = searchpdfdate.group(2) + '-' + searchpdfdate.group(3) + '-' + searchpdfdate.group(4)
+        else:
+            file_date = time.strftime('%Y-%m-%d', time.gmtime(meta['ctime']))
 
         res = conn.execute("SELECT id FROM pdf_file WHERE fullpath = \"%s\" OR md5 = \"%s\"" % (file, meta['md5']))
         has_file = res.fetchone()
