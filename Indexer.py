@@ -45,7 +45,7 @@ class Indexer(object):
             if exclude and file.find(exclude) > -1:
                 return False
 
-        res = conn.execute("SELECT id FROM pdf_file where fullpath = \"%s\"" % file.replace('png', 'pdf'));
+        res = conn.execute("SELECT id FROM pdf_file where fullpath = \"%s\"" % file.replace('png', 'pdf').replace('jpg', 'pdf').replace('jpeg', 'pdf'));
         for row in res:
             conn.execute("DELETE FROM pdf_file where fullpath = \"%s\"" % file);
             return False
@@ -368,7 +368,11 @@ class Indexer(object):
             need_consolidate = False
             last = 0
             try:
-                res = conn.execute("SELECT mtime FROM pdf_file WHERE fullpath LIKE \"" + path + "%\" ORDER BY mtime DESC LIMIT 1;");
+                res = None
+                if with_images:
+                    res = conn.execute("SELECT mtime FROM pdf_file WHERE fullpath LIKE \"" + path + "%\" AND filename NOT LIKE \"%pdf\" ORDER BY mtime DESC LIMIT 1;");
+                else:
+                    res = conn.execute("SELECT mtime FROM pdf_file WHERE fullpath LIKE \"" + path + "%\" ORDER BY mtime DESC LIMIT 1;");
                 row = res.fetchone()
                 if row:
                     last = row[0]
