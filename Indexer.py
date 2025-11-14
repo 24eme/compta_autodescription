@@ -41,7 +41,7 @@ class Indexer(object):
 
     @staticmethod
     def index_image(file, last, conn):
-        excludes = os.environ.get('COMPTA_PDF_EXCLUDE_PATH', None)
+        excludes = os.environ.get('COMPTA_PDF_EXCLUDE_PATH', '')
         for exclude in excludes.split('|'):
             if exclude and file.find(exclude) > -1:
                 return False
@@ -96,7 +96,7 @@ class Indexer(object):
 
     @staticmethod
     def index_pdf(file, last, conn):
-        excludes = os.environ.get('COMPTA_PDF_EXCLUDE_PATH', None)
+        excludes = os.environ.get('COMPTA_PDF_EXCLUDE_PATH', '')
         for exclude in excludes.split('|'):
             if exclude and file.find(exclude) > -1:
                 return False
@@ -445,7 +445,7 @@ class Indexer(object):
             Indexer.update_path(os.environ.get('COMPTA_PDF_BASE_PATH') + '/' + subdir, with_images, force)
 
 def main():
-    Indexer.update_path(sys.argv[1], True)
+    Indexer.update_path(sys.argv[1], True, True)
 
 if __name__ == "__main__":
     main()
