@@ -114,7 +114,8 @@ class Indexer(object):
             meta = {}
 
         try:
-            meta = meta | Indexer.index_pdfattachment(doc)
+            if not meta.get('facture:TTC'):
+                meta = meta | Indexer.index_pdfattachment(doc)
         except Exception:
             meta = meta
 
