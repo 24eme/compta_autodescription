@@ -7,6 +7,7 @@ import time
 from datetime import date
 from dateutil.relativedelta import relativedelta
 from django.db import models
+from lxml import etree
 
 class Indexer(object):
 
@@ -111,6 +112,12 @@ class Indexer(object):
             meta = doc.info[0]
         except IndexError:
             meta = {}
+
+        try:
+            meta = meta | Indexer.index_pdfattachment(doc)
+        except Exception:
+            meta = meta
+
         meta['file'] = file
         meta = Indexer.homogeneise_meta(meta)
 
@@ -229,6 +236,30 @@ class Indexer(object):
             print("Index: %s" % file)
 
         return True
+
+    @staticmethod
+    def index_pdfattachment(document):
+        meta = {}
+        for xref in document.xrefs:
+            for obj_id in xref.get_objids():
+                obj = document.getobj(obj_id)
+                if obj and hasattr(obj, 'get_data'):
+                        data = obj.get_data()
+                        if data and (data.startswith(b'<?xml') or data.startswith(b'<') and (data.endswith(b'>') or data.endswith(b'>\n'))):
+                            root = etree.fromstring(data)
+                            elements = root.xpath('.//*[local-name() = "GrandTotalAmount"]')
+                            meta['facture:TTC'] = elements[0].text
+                            elements = root.xpath('.//*[local-name() = "TaxBasisTotalAmount"]')
+                            meta['facture:HT'] = elements[0].text
+                            elements = root.xpath('.//*[local-name() = "ExchangedDocument"]')
+                            meta['facture:identifier'] = elements[0][0].text
+                            elements = root.xpath('.//*[local-name() = "SellerTradeParty"]')
+                            meta['facture:author'] = elements[0][0].text
+                            elements = root.xpath('.//*[local-name() = "BuyerTradeParty"]')
+                            meta['facture:client'] = elements[0][0].text
+                            elements = root.xpath('.//*[local-name() = "DateTimeString"]')
+                            meta['facture:date'] = elements[0].text[:4] + '-' + elements[0].text[4:6] + '-'+ elements[0].text[6:]
+        return meta
 
     @staticmethod
     def index_banque(csv_url, force, conn):
