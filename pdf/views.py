@@ -264,13 +264,18 @@ def stats(request):
     i = -1
     while (date_debut < date_fin):
         data["stats"].append({
-            "depenses_montant": 0,
+            "depenses_montant_cumule": 0,
+            "depenses_montant_mois": 0,
             "depenses_objs": [],
-            "factures_montant": 0,
+            "factures_montant_cumule": 0,
+            "factures_montant_mois": 0,
             "factures_objs": [],
-            "tva": 0,
-            "taxe_collectee": 0,
-            "taxe_deductible": 0,
+            "tva_cumulee": 0,
+            "taxe_collectee_cumulee": 0,
+            "taxe_deductible_cumulee": 0,
+            "tva_mois": 0,
+            "taxe_collectee_mois": 0,
+            "taxe_deductible_mois": 0,
             "date_debut": date_debut,
             "date_fin": date_fin
         })
@@ -280,7 +285,9 @@ def stats(request):
         banques = Banque.objects.raw('SELECT * from pdf_banque where date >= "%s" and date <= "%s" and piece_category IN ("DEPENSE", "SALAIRE", "TVA")' % (date_debut, date_fin) )
         for b in banques:
             if b.piece_category == "TVA":
-                data["stats"][i]['tva'] += b.amount
+                data["stats"][i]['tva_cumulee'] += b.amount
+                if b.date > date_param_fin:
+                    data["stats"][i]['tva_mois'] += b.amount
                 continue
             if b.piece_category == "DEPENSE":
                 if b.date > date_param_fin:
@@ -289,30 +296,42 @@ def stats(request):
                     p = b.getPiece()
                     if p:
                         if p.facture_prix_ht:
-                            data["stats"][i]['depenses_montant'] += p.facture_prix_ht
+                            data["stats"][i]['depenses_montant_cumule'] += p.facture_prix_ht
+                            if b.date > date_param_fin:
+                                data["stats"][i]['depenses_montant_mois'] += p.facture_prix_ht
                             if p.facture_prix_ttc:
-                                data["stats"][i]['taxe_deductible'] += p.facture_prix_ttc - p.facture_prix_ht
+                                data["stats"][i]['taxe_deductible_cumulee'] += p.facture_prix_ttc - p.facture_prix_ht
+                                if b.date > date_param_fin:
+                                    data["stats"][i]['taxe_deductible_mois'] += p.facture_prix_ttc - p.facture_prix_ht
                                 continue
                         if p.facture_prix_tax:
-                            data["stats"][i]['taxe_deductible'] += p.facture_prix_tax
+                            data["stats"][i]['taxe_deductible_cumulee'] += p.facture_prix_tax
+                            if b.date > date_param_fin:
+                                data["stats"][i]['taxe_deductible_mois'] += p.facture_prix_tax
                         continue
                 if b.amount:
-                    data["stats"][i]['depenses_montant'] += b.amount * -1
+                    data["stats"][i]['depenses_montant_cumule'] += b.amount * -1
+                    if b.date > date_param_fin:
+                        data["stats"][i]['depenses_montant_mois'] += b.amount * -1
                 continue
             if b.piece_category == "SALAIRE":
-                data["stats"][i]['depenses_montant'] += b.amount * -1
+                data["stats"][i]['depenses_montant_cumule'] += b.amount * -1
                 if b.date > date_param_fin:
                     data["stats"][i]['depenses_objs'].append(b)
+                    data["stats"][i]['depenses_montant_mois'] += b.amount * -1
 
         factures = Piece.objects.raw('SELECT * from pdf_piece where facture_date >= "%s" and facture_date <= "%s" and piece_category IN ("FACTURE")' % (date_debut, date_fin))
         for f in factures:
-            if f.facture_date > date_param_fin:
-                data["stats"][i]['factures_objs'].append(f)
+            montant = 0
             if f.facture_prix_ht:
                 if f.facture_type == "AVOIR":
-                    data["stats"][i]['factures_montant'] += f.facture_prix_ht * -1
+                    montant = f.facture_prix_ht * -1
                 else:
-                    data["stats"][i]['factures_montant'] += f.facture_prix_ht
+                    montant = f.facture_prix_ht
+                data["stats"][i]['factures_montant_cumule'] += montant
+            if f.facture_date > date_param_fin:
+                data["stats"][i]['factures_objs'].append(f)
+                data["stats"][i]['factures_montant_mois'] += montant
             tax = 0
             if f.facture_prix_tax:
                 tax = f.facture_prix_tax
@@ -321,12 +340,18 @@ def stats(request):
             if f.facture_type == "AVOIR":
                 tax *= -1
             if tax:
-                data["stats"][i]['taxe_collectee'] +=  tax
+                data["stats"][i]['taxe_collectee_cumulee'] +=  tax
+                if f.facture_date > date_param_fin:
+                    data["stats"][i]['taxe_collectee_mois'] +=  tax
 
-        data["stats"][i]['taxe_calculee'] = data["stats"][i]['taxe_deductible'] - data["stats"][i]['taxe_collectee']
-        print({'taxe_calculee': data["stats"][i]['taxe_calculee'], 'taxe_deductible': data["stats"][i]['taxe_deductible'], 'taxe_collectee': data["stats"][i]['taxe_collectee']})
-        data["stats"][i]['taxe_equilibre'] = data["stats"][i]['taxe_calculee'] - data["stats"][i]['tva']
-        data["stats"][i]['depenses_montant'] += data["stats"][i]['taxe_equilibre']
+
+        data["stats"][i]['taxe_calculee_cumulee'] = data["stats"][i]['taxe_deductible_cumulee'] - data["stats"][i]['taxe_collectee_cumulee']
+        data["stats"][i]['taxe_equilibre_cumulee'] = data["stats"][i]['taxe_calculee_cumulee'] - data["stats"][i]['tva_cumulee']
+        data["stats"][i]['depenses_montant_cumule'] += data["stats"][i]['taxe_equilibre_cumulee']
+        data["stats"][i]['taxe_calculee_mois'] = data["stats"][i]['taxe_deductible_mois'] - data["stats"][i]['taxe_collectee_mois']
+        data["stats"][i]['taxe_equilibre_mois'] = data["stats"][i]['taxe_calculee_mois'] - data["stats"][i]['tva_mois']
+        data["stats"][i]['depenses_montant_mois'] += data["stats"][i]['taxe_equilibre_mois']
+
 
         date_fin = date_param_fin.strftime("%Y-%m-%d")
 

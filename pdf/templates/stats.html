@@ -5,19 +5,53 @@
 <tr>
   <th>Date fin</th>
   <th>Date debut</th>
-  <th class="text-end">Dépenses (HT évalué)</<th>
   <th class="text-end">Facturés (HT)</<th>
+  <th></th>
+  <th class="text-end">Dépenses (HT évalué)</<th>
+  <th></th>
   <th class="text-end">TVA Collecté</<th>
   <th></th>
 </tr>
 {% for stat in stats %}
-<tr>
+<tr >
 <td>{{ stat.date_fin }}</td>
 <td>{{ stat.date_debut }}</td>
-<td class="text-end">{{ stat.depenses_montant|floatformat:2 }}</td>
-<td class="text-end">{{ stat.factures_montant|floatformat:2 }}</td>
-<td class="text-end">{{ stat.tva|floatformat:2 }}<td>
-<td class="text-muted">{{ stat.taxe_collectee|floatformat:2 }} - {{ stat.taxe_deductible|floatformat:2 }} = {{ stat.taxe_calculee|floatformat:2 }} => {{ stat.taxe_equilibre|floatformat:2 }})</td>
+<td class="text-end">{{ stat.factures_montant_cumule|floatformat:2 }}</td>
+<td class="text-end text-muted">{{ stat.factures_montant_mois|floatformat:2 }}</td>
+<td class="text-end">{{ stat.depenses_montant_cumule|floatformat:2 }}</td>
+<td class="text-end text-muted">{{ stat.depenses_montant_mois|floatformat:2 }}</td>
+<td class="text-end">{{ stat.tva_cumulee|floatformat:2 }}<td>
+<td class="text-muted">{{ stat.taxe_collectee_cumulee|floatformat:2 }} - {{ stat.taxe_deductible_cumulee|floatformat:2 }} = {{ stat.taxe_calculee_cumulee|floatformat:2 }} => {{ stat.taxe_equilibre_cumulee|floatformat:2 }})</td>
+</tr>
+<tr class="d-none">
+  <td colspan="7">
+    <div class="row">
+      <div class="col-6">
+        <div class="row">
+        <p class="col-12"><strong>Détail du facturés</strong></p>
+        </div>
+        {% for f in stat.factures_objs %}
+        <div class="row">
+          <p class="col-3">{{ f.facture_date }}</p>
+          <p class="col-6">{{ f.facture_client}}</p>
+          <p class="col-3 text-end">{{ f.facture_prix_ht }} €</p>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="col-6">
+        <div class="row">
+        <p class="col-12"><strong>Détail des dépenses</strong></p>
+        </div>
+        {% for d in stat.depenses_objs %}
+        <div class="row">
+          <p class="col-3">{{ d.date }}</p>
+          <p class="col-6">{{ d.author}} {{ d.raw }} {{ d.filename}}</p>
+          <p class="col-3 text-end">{{ d.amount }} €</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </td>
 </tr>
 {% endfor %}
 </table>
