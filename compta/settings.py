@@ -28,6 +28,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split('|')
 
+USE_THOUSAND_SEPARATOR = True
 
 # Application definition
 

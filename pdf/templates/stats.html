@@ -1,5 +1,24 @@
-<p>Dépenses : {{ depenses_montant|floatformat:2 }} (HT évalué)</p>
-
-<p>Facturés : {{ factures_montant|floatformat:2 }} HT</p>
-
-<p>TVA Collectée : {{ tva|floatformat:2 }}  (  {{ taxe_collectee|floatformat:2 }} - {{ taxe_deductible|floatformat:2 }} = {{ taxe_calculee|floatformat:2 }} => {{ taxe_equilibre|floatformat:2 }})</p>
+{% extends "layout.html" %}
+{% block title %}Statistiques{% endblock %}
+{% block content %}
+<table class="table">
+<tr>
+  <th>Date fin</th>
+  <th>Date debut</th>
+  <th class="text-end">Dépenses (HT évalué)</<th>
+  <th class="text-end">Facturés (HT)</<th>
+  <th class="text-end">TVA Collecté</<th>
+  <th></th>
+</tr>
+{% for stat in stats %}
+<tr>
+<td>{{ stat.date_fin }}</td>
+<td>{{ stat.date_debut }}</td>
+<td class="text-end">{{ stat.depenses_montant|floatformat:2 }}</td>
+<td class="text-end">{{ stat.factures_montant|floatformat:2 }}</td>
+<td class="text-end">{{ stat.tva|floatformat:2 }}<td>
+<td class="text-muted">{{ stat.taxe_collectee|floatformat:2 }} - {{ stat.taxe_deductible|floatformat:2 }} = {{ stat.taxe_calculee|floatformat:2 }} => {{ stat.taxe_equilibre|floatformat:2 }})</td>
+</tr>
+{% endfor %}
+</table>
+{% endblock %}
