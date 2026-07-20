@@ -371,8 +371,11 @@ class Indexer(object):
             dates = row['paiement_date'].split('|')
             paiements = []
             if row['paiement_amount']:
-                for p in row['paiement_amount'].split('|'):
-                    paiements.append("%0.2f"  % (abs(float(p))))
+                try:
+                    for p in row['paiement_amount'].split('|'):
+                        paiements.append("%0.2f"  % (abs(float(p))))
+                except AttributeError:
+                    paiements.append("%0.2f"  % abs(row['paiement_amount']))
             elif row['facture_prix_ttc']:
                 paiements.append("%0.2f"  % (abs(float(row['facture_prix_ttc']))))
             if len(paiements) < 1:
