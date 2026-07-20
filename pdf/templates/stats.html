@@ -5,11 +5,14 @@
 <tr>
   <th>Date fin</th>
   <th>Date debut</th>
-  <th class="text-end">Facturés (HT)</<th>
+  <th class="text-end">Facturés (HT)</th>
   <th></th>
-  <th class="text-end">Dépenses (HT évalué)</<th>
+  <th class="text-end">Dépenses (HT évalué)</th>
   <th></th>
-  <th class="text-end">TVA Collecté</<th>
+  <th class="text-end">Diff (HT évalué)</th>
+  <th></th>
+  <th class="text-end">TVA Collecté</th>
+  <th></th>
   <th></th>
 </tr>
 {% for stat in stats %}
@@ -20,36 +23,54 @@
 <td class="text-end text-muted">{{ stat.factures_montant_mois|floatformat:2 }}</td>
 <td class="text-end">{{ stat.depenses_montant_cumule|floatformat:2 }}</td>
 <td class="text-end text-muted">{{ stat.depenses_montant_mois|floatformat:2 }}</td>
-<td class="text-end">{{ stat.tva_cumulee|floatformat:2 }}<td>
-<td class="text-muted">{{ stat.taxe_collectee_cumulee|floatformat:2 }} - {{ stat.taxe_deductible_cumulee|floatformat:2 }} = {{ stat.taxe_calculee_cumulee|floatformat:2 }} => {{ stat.taxe_equilibre_cumulee|floatformat:2 }})</td>
+<td class="text-end" style="color: {% if stat.diff_cumule < 0 %}red{% else %}green{% endif %}">{{  stat.diff_cumule|floatformat:2 }}</td>
+<td class="text-end text-opacity-50 {% if stat.diff_mois < 0 %}text-danger{% else %}text-success{% endif %}">{{  stat.diff_mois|floatformat:2 }}</td>
+<td class="text-end">
+  {{ stat.tva_cumulee|floatformat:2 }}
+  <button type="button" class="btn btn-secondary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{ stat.taxe_collectee_cumulee|floatformat:2 }} - {{ stat.taxe_deductible_cumulee|floatformat:2 }} = {{ stat.taxe_calculee_cumulee|floatformat:2 }} => {{ stat.taxe_equilibre_cumulee|floatformat:2 }})">
+      ?
+  </button>
+</td>
+<td class="text-end"><a href="#" onclick="document.querySelector('#detail_{{ stat.index }}').classList.remove('d-none');return false;">voir détail</a></td>
 </tr>
-<tr class="d-none">
-  <td colspan="7">
+<tr class="d-none" id="detail_{{ stat.index }}">
+  <td colspan="10">
     <div class="row">
-      <div class="col-6">
-        <div class="row">
-        <p class="col-12"><strong>Détail du facturés</strong></p>
+        <p class="col-12"><strong>Détail</strong></p>
+        {% for k, o in stat.objs.items %}
+        {% if o.is_facture %}
+        <div class="row text-success">
+          <p class="col-1"></p>
+          <p class="col-2">{{ o.obj.facture_date }}</p>
+          <p class="col-6">{{ o.obj.facture_client}}</p>
+          <p class="col-2 text-end">{{ o.obj.facture_prix_ht }} HT</p>
+          <p class="col-1"><a href="./pdf/{{ o.obj.md5 }}">Voir&nbsp;la&nbsp;pièce</a></p>
         </div>
-        {% for f in stat.factures_objs %}
-        <div class="row">
-          <p class="col-3">{{ f.facture_date }}</p>
-          <p class="col-6">{{ f.facture_client}}</p>
-          <p class="col-3 text-end">{{ f.facture_prix_ht }} €</p>
+        {% endif %}
+        {% if o.is_banque %}
+        <div class="row text-danger">
+          <p class="col-1"></p>
+          <p class="col-2">{{ o.obj.date }}</p>
+          <p class="col-6">{{ o.obj.author}} {{ o.obj.raw }} {{ o.obj.filename}}</p>
+          <p class="col-2 text-end">
+          {% if o.piece %}
+          {% if o.piece.facture_prix_ht %}
+          {{ o.piece.facture_prix_ht }} HT
+          {% else %}
+          {{ o.piece.facture_prix_ttc }} € TTC
+          {% endif %}
+          {%  else %}
+          {{ o.obj.amount }} € TTC
+          {% endif %}
+          </p>
+          {% if o.piece %}
+          <p class="col-1"><a href="./pdf/{{ o.obj.getPieceMd5 }}">Voir&nbsp;la&nbsp;pièce</a></p>
+          {% else %}
+          <p class="col-1"><a href="./banque/{{ o.obj.id | stringformat:"s" }}">Associer</a></p>
+          {% endif %}
         </div>
+        {% endif %}
         {% endfor %}
-      </div>
-      <div class="col-6">
-        <div class="row">
-        <p class="col-12"><strong>Détail des dépenses</strong></p>
-        </div>
-        {% for d in stat.depenses_objs %}
-        <div class="row">
-          <p class="col-3">{{ d.date }}</p>
-          <p class="col-6">{{ d.author}} {{ d.raw }} {{ d.filename}}</p>
-          <p class="col-3 text-end">{{ d.amount }} €</p>
-        </div>
-        {% endfor %}
-      </div>
     </div>
   </td>
 </tr>

@@ -263,6 +263,7 @@ def stats(request):
 
     i = -1
     while (date_debut < date_fin):
+        i += 1
         data["stats"].append({
             "depenses_montant_cumule": 0,
             "depenses_montant_mois": 0,
@@ -270,6 +271,7 @@ def stats(request):
             "factures_montant_cumule": 0,
             "factures_montant_mois": 0,
             "factures_objs": [],
+            "objs": {},
             "tva_cumulee": 0,
             "taxe_collectee_cumulee": 0,
             "taxe_deductible_cumulee": 0,
@@ -277,9 +279,12 @@ def stats(request):
             "taxe_collectee_mois": 0,
             "taxe_deductible_mois": 0,
             "date_debut": date_debut,
-            "date_fin": date_fin
+            "date_fin": date_fin,
+            "diff_mois": 0,
+            "diff_cumule": 0,
+            "index": i
         })
-        i += 1
+
         date_param_fin = date_param_fin.replace(day=1) - datetime.timedelta(days=1)
 
         banques = Banque.objects.raw('SELECT * from pdf_banque where date >= "%s" and date <= "%s" and piece_category IN ("DEPENSE", "SALAIRE", "TVA")' % (date_debut, date_fin) )
@@ -290,11 +295,16 @@ def stats(request):
                     data["stats"][i]['tva_mois'] += b.amount
                 continue
             if b.piece_category == "DEPENSE":
+                obj_id = None
                 if b.date > date_param_fin:
                     data["stats"][i]['depenses_objs'].append(b)
+                    obj_id = "%d-%d-%d_%d" % (b.date.year, b.date.month, b.date.day, b.id)
+                    data["stats"][i]['objs'][obj_id] = {"obj": b, "is_facture": False, "is_banque": True, "piece": None}
                 if b.piece_id:
                     p = b.getPiece()
                     if p:
+                        if obj_id:
+                            data["stats"][i]['objs'][obj_id]['piece'] = p
                         if p.facture_prix_ht:
                             data["stats"][i]['depenses_montant_cumule'] += p.facture_prix_ht
                             if b.date > date_param_fin:
@@ -331,6 +341,7 @@ def stats(request):
                 data["stats"][i]['factures_montant_cumule'] += montant
             if f.facture_date > date_param_fin:
                 data["stats"][i]['factures_objs'].append(f)
+                data["stats"][i]['objs']["%d-%d-%d_%d" % (f.facture_date.year, f.facture_date.month, f.facture_date.day, f.id)] = {"obj": f, "is_facture": True, "is_banque": False}
                 data["stats"][i]['factures_montant_mois'] += montant
             tax = 0
             if f.facture_prix_tax:
@@ -352,6 +363,8 @@ def stats(request):
         data["stats"][i]['taxe_equilibre_mois'] = data["stats"][i]['taxe_calculee_mois'] - data["stats"][i]['tva_mois']
         data["stats"][i]['depenses_montant_mois'] += data["stats"][i]['taxe_equilibre_mois']
 
+        data["stats"][i]['diff_mois'] = data["stats"][i]['factures_montant_mois'] - data["stats"][i]['depenses_montant_mois']
+        data["stats"][i]['diff_cumule'] = data["stats"][i]['factures_montant_cumule'] - data["stats"][i]['depenses_montant_cumule']
 
         date_fin = date_param_fin.strftime("%Y-%m-%d")
 
