@@ -337,10 +337,9 @@ def stats(request):
         for f in factures:
             montant = 0
             if f.facture_prix_ht:
-                if f.facture_type == "AVOIR":
-                    montant = f.facture_prix_ht * -1
-                else:
-                    montant = f.facture_prix_ht
+                montant = f.facture_prix_ht
+                if f.facture_type == "AVOIR" and f.facture_prix_ht > 0:
+                    montant = -1 * montant
                 data["stats"][i]['factures_montant_cumule'] += montant
             if f.facture_date > date_param_fin:
                 data["stats"][i]['factures_objs'].append(f)
