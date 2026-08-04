@@ -36,6 +36,9 @@ class Banque(models.Model):
             return True
         return False
 
+    def amount_abs(self):
+        return abs(self.amount)
+
 
 class Piece(models.Model):
     filename = models.TextField(null=True)
