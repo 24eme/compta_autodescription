@@ -260,6 +260,9 @@ def stats(request):
     date_fin = date_param_fin.strftime("%Y-%m-%d")
     date_param_debut = date_param_fin - datetime.timedelta(weeks=7*4)
     date_debut = date_param_debut.strftime("%Y-07-01")
+    date_precedente = date_param_debut.strftime("%Y-06-30")
+
+    data["date_precedente"] = date_precedente
 
     i = -1
     while (date_debut < date_fin):
@@ -368,5 +371,4 @@ def stats(request):
 
         date_fin = date_param_fin.strftime("%Y-%m-%d")
 
-    print([data]);
     return render(request, "stats.html", data)
